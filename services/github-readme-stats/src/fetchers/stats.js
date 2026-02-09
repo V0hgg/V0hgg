@@ -10,8 +10,11 @@ import { excludeRepositories } from "../common/envs.js";
 import { CustomError, MissingParamError } from "../common/error.js";
 import { wrapTextMultiline } from "../common/fmt.js";
 import { request } from "../common/http.js";
+import { loadDotenv } from "../common/load-dotenv.js";
 
+// Keep compatibility with upstream while making local monorepo dev work.
 dotenv.config();
+loadDotenv();
 
 // GraphQL queries.
 const GRAPHQL_REPOS_FIELD = `

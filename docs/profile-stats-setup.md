@@ -6,9 +6,9 @@ This repository hosts two things:
 
 ## Vercel Project
 
-- Project: `hunters-projects-83122528/github-readme-stats`
+- Project: `v0hgg/github-readme-stats`
 - Root directory: `services/github-readme-stats`
-- Stable production domain: `https://github-readme-stats-opal-pi-60.vercel.app`
+- Stable production domain: `https://github-readme-stats-v0hgg.vercel.app`
 
 ## Required Secret (Private-Inclusive Metrics)
 

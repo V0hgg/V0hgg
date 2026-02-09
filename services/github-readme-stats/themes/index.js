@@ -462,6 +462,24 @@ export const themes = {
     icon_color: "ffffff",
     bg_color: "35,4158d0,c850c0,ffcc70",
   },
+  // Custom: futuristic, playful "neon circuit" look.
+  // Tip: use with `hide_border=true` (or keep border for a crisp frame).
+  neon_circuit: {
+    title_color: "ff4fd8", // magenta
+    text_color: "b8fff5", // icy teal
+    icon_color: "39ff14", // acid green
+    border_color: "2cf8ff", // cyan
+    bg_color: "05060a", // near-black
+  },
+  // Same palette as `neon_circuit` but with a cyber gradient background.
+  // bg_color format: "angle,stop1,stop2,stop3,..."
+  neon_circuit_gradient: {
+    title_color: "ff4fd8",
+    text_color: "e7fbff",
+    icon_color: "39ff14",
+    border_color: "2cf8ff",
+    bg_color: "135,05060a,0b1226,0c0033",
+  },
 };
 
 export default themes;

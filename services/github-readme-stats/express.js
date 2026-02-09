@@ -1,10 +1,12 @@
-import "dotenv/config";
 import statsCard from "./api/index.js";
 import repoCard from "./api/pin.js";
 import langCard from "./api/top-langs.js";
 import wakatimeCard from "./api/wakatime.js";
 import gistCard from "./api/gist.js";
 import express from "express";
+import { loadDotenv } from "./src/common/load-dotenv.js";
+
+loadDotenv();
 
 const app = express();
 const router = express.Router();
