@@ -6,25 +6,59 @@ import gistCard from "./api/gist.js";
 import telemetryCard from "./api/telemetry.js";
 import express from "express";
 import { loadDotenv } from "./src/common/load-dotenv.js";
+import fs from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { createServer as createViteServer } from "vite";
 
 loadDotenv();
 
-const app = express();
-const router = express.Router();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// Local dev UX: serve the Space Arcade playground at `/`.
-app.use(express.static("public"));
+async function start() {
+  const app = express();
+  const router = express.Router();
 
-router.get("/", statsCard);
-router.get("/pin", repoCard);
-router.get("/top-langs", langCard);
-router.get("/wakatime", wakatimeCard);
-router.get("/gist", gistCard);
-router.get("/telemetry", telemetryCard);
+  router.get("/", statsCard);
+  router.get("/pin", repoCard);
+  router.get("/top-langs", langCard);
+  router.get("/wakatime", wakatimeCard);
+  router.get("/gist", gistCard);
+  router.get("/telemetry", telemetryCard);
 
-app.use("/api", router);
+  app.use("/api", router);
 
-const port = process.env.PORT || process.env.port || 9000;
-app.listen(port, "0.0.0.0", () => {
-  console.log(`Server running on port ${port}`);
-});
+  if (process.env.NODE_ENV === "production") {
+    const dist = path.resolve(__dirname, "dist");
+    app.use(express.static(dist));
+    app.get(/.*/, (_req, res) => res.sendFile(path.join(dist, "index.html")));
+  } else {
+    // Vite dev server in middleware mode (single-process dev).
+    const vite = await createViteServer({
+      root: __dirname,
+      server: { middlewareMode: true },
+      appType: "custom",
+    });
+    app.use(vite.middlewares);
+
+    app.use(async (req, res, next) => {
+      try {
+        const url = req.originalUrl;
+        let html = await fs.readFile(path.resolve(__dirname, "index.html"), "utf-8");
+        html = await vite.transformIndexHtml(url, html);
+        res.status(200).set({ "Content-Type": "text/html" }).end(html);
+      } catch (err) {
+        // @ts-ignore
+        vite.ssrFixStacktrace?.(err);
+        next(err);
+      }
+    });
+  }
+
+  const port = process.env.PORT || process.env.port || 9000;
+  app.listen(port, "0.0.0.0", () => {
+    console.log(`Server running on port ${port}`);
+  });
+}
+
+start();

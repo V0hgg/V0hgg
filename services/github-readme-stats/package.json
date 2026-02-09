@@ -21,6 +21,8 @@
   "scripts": {
     "dev": "PORT=3000 node express.js",
     "start": "node express.js",
+    "build": "vite build",
+    "preview": "vite preview",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
     "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
     "test:update:snapshot": "node --experimental-vm-modules node_modules/jest/bin/jest.js -u",
@@ -45,6 +47,7 @@
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@uppercod/css-to-object": "^1.1.1",
+    "@vitejs/plugin-react": "^4.4.1",
     "axios-mock-adapter": "^2.1.0",
     "color-contrast-checker": "^2.1.0",
     "eslint": "^9.39.2",
@@ -60,13 +63,19 @@
     "lint-staged": "^16.2.7",
     "lodash.snakecase": "^4.1.1",
     "parse-diff": "^0.11.1",
-    "prettier": "^3.7.3"
+    "prettier": "^3.7.3",
+    "vite": "^6.3.5"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^3.0.7",
+    "@ai-sdk/react": "^3.0.44",
     "axios": "^1.13.1",
+    "ai": "^6.0.42",
     "dotenv": "^17.2.3",
     "emoji-name-map": "^2.0.3",
     "github-username-regex": "^1.0.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
     "word-wrap": "^1.2.5"
   },
   "lint-staged": {

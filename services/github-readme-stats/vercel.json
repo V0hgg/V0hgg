@@ -1,15 +1,12 @@
 {
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
   "functions": {
     "api/*.js": {
       "memory": 128,
       "maxDuration": 10
     }
   },
-  "rewrites": [
-    { "source": "/", "destination": "/public/index.html" },
-    { "source": "/styles.css", "destination": "/public/styles.css" },
-    { "source": "/app.js", "destination": "/public/app.js" }
-  ],
   "redirects": [
     {
       "source": "/upstream",
