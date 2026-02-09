@@ -44,6 +44,12 @@ export default async (req, res) => {
 
   res.setHeader("Content-Type", "image/svg+xml");
 
+  const toInt = (v) => {
+    if (typeof v !== "string") return undefined;
+    const n = parseInt(v, 10);
+    return Number.isFinite(n) ? n : undefined;
+  };
+
   const access = guardAccess({
     res,
     id: username,
@@ -68,7 +74,7 @@ export default async (req, res) => {
       false,
       false,
       false,
-      parseInt(commits_year, 10),
+      toInt(commits_year),
     );
 
     const langs = await fetchTopLanguages(
@@ -96,12 +102,12 @@ export default async (req, res) => {
         border_color,
         theme,
         card_style,
-        card_width: parseInt(card_width, 10),
-        card_height: parseInt(card_height, 10),
-        border_radius: parseInt(border_radius, 10),
+        card_width: toInt(card_width),
+        card_height: toInt(card_height),
+        border_radius: toInt(border_radius),
         hide_border: parseBoolean(hide_border),
         disable_animations: parseBoolean(disable_animations),
-        langs_count: parseInt(langs_count, 10),
+        langs_count: toInt(langs_count),
       }),
     );
   } catch (err) {
@@ -136,4 +142,3 @@ export default async (req, res) => {
     );
   }
 };
-

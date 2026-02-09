@@ -59,11 +59,19 @@ const renderBg = (bgColor) => {
  * @returns {{name: string, color: string | null, pct: number}[]}
  */
 const getLangRows = (topLangs, count) => {
+  const safeCount = Number.isFinite(count) ? count : 6;
+  const limit = Math.max(1, Math.min(10, safeCount));
+
   const rows = Object.values(topLangs || {})
-    .filter((l) => l && typeof l.size === "number" && l.size > 0)
+    .map((l) => {
+      if (!l) return null;
+      const size = typeof l.size === "number" ? l.size : Number(l.size);
+      return { ...l, size };
+    })
+    .filter((l) => l && Number.isFinite(l.size) && l.size > 0)
     .sort((a, b) => b.size - a.size);
 
-  const slice = rows.slice(0, Math.max(1, Math.min(10, count)));
+  const slice = rows.slice(0, limit);
   const total = slice.reduce((acc, l) => acc + l.size, 0) || 1;
   return slice.map((l) => ({
     name: l.name,
@@ -177,8 +185,8 @@ const renderTelemetryCard = (stats, topLangs, options = {}) => {
 
   const langRows = getLangRows(topLangs, langs_count);
   const langs = (() => {
-    const headY = 78;
-    const rowY0 = 108;
+    const headY = 96;
+    const rowY0 = 126;
     const rowH = 32;
     const barH = 8;
     const barW = Math.max(220, Math.round(rightW - 120));
@@ -186,23 +194,25 @@ const renderTelemetryCard = (stats, topLangs, options = {}) => {
     return `
       <g class="langs" transform="translate(${rightX}, 0)">
         <text class="h2" x="0" y="${headY}">STACK</text>
-        ${langRows
-          .map((l, idx) => {
-            const y = rowY0 + idx * rowH;
-            const pct = Math.max(0, Math.min(100, l.pct));
-            const fillW = Math.max(2, Math.round((pct / 100) * barW));
-            const c = l.color || colors.titleColor;
-            return `
-              <g class="lang" transform="translate(0, ${y})">
-                <circle class="lang__dot" cx="4" cy="4" r="4" fill="${c}" />
-                <text class="lang__name" x="16" y="8">${encodeHTML(l.name)}</text>
-                <text class="lang__pct" x="${rightW}" y="8" text-anchor="end">${pct.toFixed(1)}%</text>
-                <rect class="lang__track" x="16" y="14" width="${barW}" height="${barH}" rx="999" />
-                <rect class="lang__fill" x="16" y="14" width="${fillW}" height="${barH}" rx="999" fill="${c}" />
-              </g>
-            `;
-          })
-          .join("\n")}
+        ${langRows.length
+          ? langRows
+              .map((l, idx) => {
+                const y = rowY0 + idx * rowH;
+                const pct = Math.max(0, Math.min(100, l.pct));
+                const fillW = Math.max(2, Math.round((pct / 100) * barW));
+                const c = l.color || colors.titleColor;
+                return `
+                  <g class="lang" transform="translate(0, ${y})">
+                    <circle class="lang__dot" cx="4" cy="4" r="4" fill="${c}" />
+                    <text class="lang__name" x="16" y="8">${encodeHTML(l.name)}</text>
+                    <text class="lang__pct" x="${rightW}" y="8" text-anchor="end">${pct.toFixed(1)}%</text>
+                    <rect class="lang__track" x="16" y="14" width="${barW}" height="${barH}" rx="999" />
+                    <rect class="lang__fill" x="16" y="14" width="${fillW}" height="${barH}" rx="999" fill="${c}" />
+                  </g>
+                `;
+              })
+              .join("\n")
+          : `<text class="lang__empty" x="0" y="${rowY0}">NO LANGUAGE DATA</text>`}
       </g>
     `;
   })();
@@ -347,6 +357,13 @@ const renderTelemetryCard = (stats, topLangs, options = {}) => {
     .lang__name, .lang__pct {
       font: 600 11px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       fill: rgba(231, 251, 255, 0.78);
+    }
+
+    .lang__empty {
+      font: 600 11px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      fill: rgba(231, 251, 255, 0.55);
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
     }
 
     .lang__track {
@@ -500,8 +517,8 @@ const renderTelemetryCard = (stats, topLangs, options = {}) => {
 
         <g class="hud">
           <text class="hdr" x="${P}" y="48">TELEMETRY</text>
+          <text class="sub" x="${W - P}" y="48" text-anchor="end">SCENE · ${scene.toUpperCase()}</text>
           <text class="sub" x="${P}" y="70">USER · ${name || "UNKNOWN"}</text>
-          <text class="sub" x="${rightX}" y="70">SCENE · ${scene.toUpperCase()}</text>
 
           ${tiles}
           ${langs}
@@ -533,4 +550,3 @@ const renderTelemetryCard = (stats, topLangs, options = {}) => {
 
 export { renderTelemetryCard };
 export default renderTelemetryCard;
-
