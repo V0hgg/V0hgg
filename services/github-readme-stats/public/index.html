@@ -88,15 +88,20 @@
 
             <div class="row">
               <label class="toggle">
-                <input id="showIcons" type="checkbox" checked />
-                <span class="toggle__ui" aria-hidden="true"></span>
-                <span class="toggle__label">Show icons</span>
-              </label>
-
-              <label class="toggle">
                 <input id="includeAllCommits" type="checkbox" checked />
                 <span class="toggle__ui" aria-hidden="true"></span>
                 <span class="toggle__label">Include all commits</span>
+              </label>
+
+              <label class="field">
+                <span class="field__label">Lang count</span>
+                <input
+                  class="field__input"
+                  id="langsCount"
+                  name="langsCount"
+                  inputmode="numeric"
+                  value="6"
+                />
               </label>
             </div>
 
@@ -105,12 +110,6 @@
                 <input id="hideBorder" type="checkbox" checked />
                 <span class="toggle__ui" aria-hidden="true"></span>
                 <span class="toggle__label">Hide border</span>
-              </label>
-
-              <label class="toggle">
-                <input id="compactLangs" type="checkbox" checked />
-                <span class="toggle__ui" aria-hidden="true"></span>
-                <span class="toggle__label">Compact languages</span>
               </label>
             </div>
 
@@ -131,8 +130,8 @@
             <button class="btn" id="copyMarkdown" type="button">
               Copy README Markdown
             </button>
-            <button class="btn btn--ghost" id="openStats" type="button">
-              Open cards
+            <button class="btn btn--ghost" id="openCard" type="button">
+              Open card
             </button>
           </div>
         </section>
@@ -146,14 +145,9 @@
           </div>
 
           <div class="preview">
-            <div class="preview__card" id="statsWrap">
-              <div class="preview__label">Stats</div>
-              <img id="statsImg" alt="GitHub stats card preview" />
-            </div>
-
-            <div class="preview__card" id="langsWrap">
-              <div class="preview__label">Top languages</div>
-              <img id="langsImg" alt="Top languages card preview" />
+            <div class="preview__card" id="telemetryWrap">
+              <div class="preview__label">Telemetry</div>
+              <img id="telemetryImg" alt="Telemetry card preview" />
             </div>
           </div>
 

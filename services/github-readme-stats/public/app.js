@@ -4,17 +4,15 @@ const els = {
   username: qs("#username"),
   cardStyle: qs("#cardStyle"),
   cacheSeconds: qs("#cacheSeconds"),
-  showIcons: qs("#showIcons"),
   includeAllCommits: qs("#includeAllCommits"),
+  langsCount: qs("#langsCount"),
   hideBorder: qs("#hideBorder"),
-  compactLangs: qs("#compactLangs"),
   theme: qs("#theme"),
-  statsImg: qs("#statsImg"),
-  langsImg: qs("#langsImg"),
+  telemetryImg: qs("#telemetryImg"),
   mdOut: qs("#mdOut"),
   copyMarkdown: qs("#copyMarkdown"),
   copyCode: qs("#copyCode"),
-  openStats: qs("#openStats"),
+  openCard: qs("#openCard"),
   randomize: qs("#randomize"),
 };
 
@@ -37,45 +35,34 @@ function buildUrls() {
   const theme = els.theme.value || "space_time_gradient";
   const card_style = els.cardStyle.value;
   const cache_seconds = safeInt(els.cacheSeconds.value, 21600);
+  const langs_count = safeInt(els.langsCount.value, 6);
   const hide_border = els.hideBorder.checked ? "true" : "false";
 
-  const stats = new URLSearchParams();
-  stats.set("username", username);
-  stats.set("show_icons", els.showIcons.checked ? "true" : "false");
-  stats.set("hide_border", hide_border);
-  stats.set("theme", theme);
-  if (card_style) stats.set("card_style", card_style);
-  stats.set("include_all_commits", els.includeAllCommits.checked ? "true" : "false");
-  stats.set("cache_seconds", String(cache_seconds));
+  const telem = new URLSearchParams();
+  telem.set("username", username);
+  telem.set("hide_border", hide_border);
+  telem.set("theme", theme);
+  if (card_style) telem.set("card_style", card_style);
+  telem.set(
+    "include_all_commits",
+    els.includeAllCommits.checked ? "true" : "false",
+  );
+  telem.set("langs_count", String(langs_count));
+  telem.set("cache_seconds", String(cache_seconds));
 
-  const langs = new URLSearchParams();
-  langs.set("username", username);
-  langs.set("layout", els.compactLangs.checked ? "compact" : "normal");
-  langs.set("hide_border", hide_border);
-  // Top-langs looks nicer without the gradient background by default.
-  langs.set("theme", theme.replace(/_gradient$/, ""));
-  if (card_style) langs.set("card_style", card_style);
-  langs.set("cache_seconds", String(cache_seconds));
-
-  const statsUrl = `/api?${stats.toString()}`;
-  const langsUrl = `/api/top-langs?${langs.toString()}`;
-  return { username, statsUrl, langsUrl };
+  const telemetryUrl = `/api/telemetry?${telem.toString()}`;
+  return { username, telemetryUrl };
 }
 
 function update() {
-  const { statsUrl, langsUrl } = buildUrls();
+  const { telemetryUrl } = buildUrls();
 
   // Bust browser cache on rapid edits while keeping server cache intact.
   const bust = `b=${Date.now().toString(36)}`;
-  els.statsImg.src = `${statsUrl}&${bust}`;
-  els.langsImg.src = `${langsUrl}&${bust}`;
+  els.telemetryImg.src = `${telemetryUrl}&${bust}`;
 
   const origin = window.location.origin;
-  const md = [
-    `![GitHub Stats](${origin}${statsUrl})`,
-    ``,
-    `![Top Languages](${origin}${langsUrl})`,
-  ].join("\n");
+  const md = `![GitHub Telemetry](${origin}${telemetryUrl})`;
   els.mdOut.textContent = md;
 }
 
@@ -109,10 +96,9 @@ els.copyCode.addEventListener("click", async () => {
   setTimeout(() => (els.copyCode.textContent = "Copy"), 900);
 });
 
-els.openStats.addEventListener("click", () => {
-  const { statsUrl, langsUrl } = buildUrls();
-  window.open(statsUrl, "_blank", "noopener,noreferrer");
-  window.open(langsUrl, "_blank", "noopener,noreferrer");
+els.openCard.addEventListener("click", () => {
+  const { telemetryUrl } = buildUrls();
+  window.open(telemetryUrl, "_blank", "noopener,noreferrer");
 });
 
 els.randomize.addEventListener("click", () => {

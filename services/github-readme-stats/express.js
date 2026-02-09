@@ -3,6 +3,7 @@ import repoCard from "./api/pin.js";
 import langCard from "./api/top-langs.js";
 import wakatimeCard from "./api/wakatime.js";
 import gistCard from "./api/gist.js";
+import telemetryCard from "./api/telemetry.js";
 import express from "express";
 import { loadDotenv } from "./src/common/load-dotenv.js";
 
@@ -19,6 +20,7 @@ router.get("/pin", repoCard);
 router.get("/top-langs", langCard);
 router.get("/wakatime", wakatimeCard);
 router.get("/gist", gistCard);
+router.get("/telemetry", telemetryCard);
 
 app.use("/api", router);
 
