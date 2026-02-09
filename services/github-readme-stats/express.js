@@ -8,6 +8,7 @@ import express from "express";
 import { loadDotenv } from "./src/common/load-dotenv.js";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { createServer } from "node:http";
 import { fileURLToPath } from "node:url";
 import { createServer as createViteServer } from "vite";
 
@@ -28,6 +29,8 @@ async function start() {
 
   app.use("/api", router);
 
+  const server = createServer(app);
+
   if (process.env.NODE_ENV === "production") {
     const dist = path.resolve(__dirname, "dist");
     app.use(express.static(dist));
@@ -40,6 +43,12 @@ async function start() {
       appType: "custom",
     });
     app.use(vite.middlewares);
+
+    // Enable Vite HMR WS upgrades in dev.
+    server.on("upgrade", (req, socket, head) => {
+      // @ts-ignore
+      vite.ws.handleUpgrade(req, socket, head);
+    });
 
     app.use(async (req, res, next) => {
       try {
@@ -56,7 +65,7 @@ async function start() {
   }
 
   const port = process.env.PORT || process.env.port || 9000;
-  app.listen(port, "0.0.0.0", () => {
+  server.listen(port, "0.0.0.0", () => {
     console.log(`Server running on port ${port}`);
   });
 }
