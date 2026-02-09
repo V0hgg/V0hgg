@@ -34,12 +34,14 @@ const DURATIONS = {
 const CACHE_TTL = {
   STATS_CARD: {
     DEFAULT: DURATIONS.ONE_DAY,
-    MIN: DURATIONS.TWELVE_HOURS,
+    // Self-host friendly: allow a 6-hour cache as requested in the profile README.
+    MIN: DURATIONS.SIX_HOURS,
     MAX: DURATIONS.TWO_DAY,
   },
   TOP_LANGS_CARD: {
     DEFAULT: DURATIONS.SIX_DAY,
-    MIN: DURATIONS.TWO_DAY,
+    // Self-host friendly: allow lower caches for frequent profile updates.
+    MIN: DURATIONS.SIX_HOURS,
     MAX: DURATIONS.TEN_DAY,
   },
   PIN_CARD: {
@@ -54,7 +56,7 @@ const CACHE_TTL = {
   },
   WAKATIME_CARD: {
     DEFAULT: DURATIONS.ONE_DAY,
-    MIN: DURATIONS.TWELVE_HOURS,
+    MIN: DURATIONS.SIX_HOURS,
     MAX: DURATIONS.TWO_DAY,
   },
   ERROR: DURATIONS.TEN_MINUTES,
