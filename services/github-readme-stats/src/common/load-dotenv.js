@@ -14,23 +14,37 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import * as dotenv from "dotenv";
 
-const serviceRoot = path.resolve(
+// This file lives at: services/github-readme-stats/src/common/load-dotenv.js
+// packageRoot => services/github-readme-stats
+// (src/common -> src -> packageRoot)
+const packageRoot = path.resolve(
   fileURLToPath(new URL("../../", import.meta.url)),
 );
 
+// repoRoot => (monorepo) root folder that contains `services/`
+const repoRoot = path.resolve(packageRoot, "..", "..");
+
 const candidates = [
-  path.join(serviceRoot, ".env.local"),
-  path.join(serviceRoot, ".env"),
+  // Prefer package-local envs if the user keeps secrets near the service.
+  path.join(packageRoot, ".env.local"),
+  path.join(packageRoot, ".env"),
+  // Vercel CLI often writes `.env.local` at the repo root when linking/pulling envs.
+  path.join(repoRoot, ".env.local"),
+  path.join(repoRoot, ".env"),
 ];
+
+let didLoad = false;
 
 /**
  * Load `.env.local` / `.env` from the service root if they exist.
  * Does not override pre-existing env vars (e.g. those set by Vercel).
  */
 export function loadDotenv() {
+  if (didLoad) return;
+  didLoad = true;
+
   for (const p of candidates) {
     if (!fs.existsSync(p)) continue;
-    dotenv.config({ path: p, override: false });
+    dotenv.config({ path: p, override: false, quiet: true });
   }
 }
-

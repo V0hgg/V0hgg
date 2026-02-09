@@ -76,6 +76,7 @@ const renderRepoCard = (repo, options = {}) => {
     border_color,
     locale,
     description_lines_count,
+    card_style,
   } = options;
 
   const lineHeight = 10;
@@ -160,6 +161,7 @@ const renderRepoCard = (repo, options = {}) => {
   card.disableAnimations();
   card.setHideBorder(hide_border);
   card.setHideTitle(false);
+  card.setCardStyle(card_style);
   card.setCSS(`
     .description { font: 400 13px 'Segoe UI', Ubuntu, Sans-Serif; fill: ${colors.textColor} }
     .gray { font: 400 12px 'Segoe UI', Ubuntu, Sans-Serif; fill: ${colors.textColor} }

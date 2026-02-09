@@ -53,6 +53,7 @@ const renderGistCard = (gistData, options = {}) => {
     border_color,
     show_owner = false,
     hide_border = false,
+    card_style,
   } = options;
 
   // returns theme based colors with proper overrides and defaults
@@ -136,6 +137,7 @@ const renderGistCard = (gistData, options = {}) => {
     .icon { fill: ${iconColor} }
   `);
   card.setHideBorder(hide_border);
+  card.setCardStyle(card_style);
 
   return card.render(`
     <text class="description" x="25" y="-5">

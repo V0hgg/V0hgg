@@ -42,6 +42,7 @@ export default async (req, res) => {
     disable_animations,
     hide_progress,
     stats_format,
+    card_style,
   } = req.query;
   res.setHeader("Content-Type", "image/svg+xml");
 
@@ -152,6 +153,7 @@ export default async (req, res) => {
         disable_animations: parseBoolean(disable_animations),
         hide_progress: parseBoolean(hide_progress),
         stats_format,
+        card_style,
       }),
     );
   } catch (err) {

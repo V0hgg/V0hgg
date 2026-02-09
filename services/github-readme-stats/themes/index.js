@@ -480,6 +480,22 @@ export const themes = {
     border_color: "2cf8ff",
     bg_color: "135,05060a,0b1226,0c0033",
   },
+  // Custom: playful space arcade palette.
+  space_arcade: {
+    title_color: "7df9ff", // neon cyan
+    text_color: "e7fbff", // ice
+    icon_color: "ffe45e", // arcade yellow
+    border_color: "7df9ff",
+    bg_color: "070a18", // deep space
+  },
+  // Same palette with a nebula-like gradient.
+  space_arcade_gradient: {
+    title_color: "7df9ff",
+    text_color: "e7fbff",
+    icon_color: "ffe45e",
+    border_color: "7df9ff",
+    bg_color: "140,05060a,070a18,1a0f3d,012a4a",
+  },
 };
 
 export default themes;

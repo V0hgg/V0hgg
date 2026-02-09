@@ -8,8 +8,12 @@
  */
 
 import { request } from "../../src/common/http.js";
+import { loadDotenv } from "../../src/common/load-dotenv.js";
 import { logger } from "../../src/common/log.js";
 import { dateDiff } from "../../src/common/ops.js";
+
+// In local dev, PAT_1 often lives in a `.env.local` at repo root.
+loadDotenv();
 
 export const RATE_LIMIT_SECONDS = 60 * 5; // 1 request per 5 minutes
 

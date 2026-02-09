@@ -293,6 +293,7 @@ const renderStatsCard = (stats, options = {}) => {
     number_precision,
     locale,
     disable_animations = false,
+    card_style,
     rank_icon = "default",
     show = [],
   } = options;
@@ -521,6 +522,7 @@ const renderStatsCard = (stats, options = {}) => {
   card.setHideBorder(hide_border);
   card.setHideTitle(hide_title);
   card.setCSS(cssStyles);
+  card.setCardStyle(card_style);
 
   if (disable_animations) {
     card.disableAnimations();

@@ -11,6 +11,9 @@ loadDotenv();
 const app = express();
 const router = express.Router();
 
+// Local dev UX: serve the Space Arcade playground at `/`.
+app.use(express.static("public"));
+
 router.get("/", statsCard);
 router.get("/pin", repoCard);
 router.get("/top-langs", langCard);

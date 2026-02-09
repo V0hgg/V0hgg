@@ -2,14 +2,14 @@
 
 import { CustomError } from "./error.js";
 import { logger } from "./log.js";
+import { loadDotenv } from "./load-dotenv.js";
 
 // Script variables.
 
-// Count the number of GitHub API tokens available.
-const PATs = Object.keys(process.env).filter((key) =>
-  /PAT_\d*$/.exec(key),
-).length;
-const RETRIES = process.env.NODE_ENV === "test" ? 7 : PATs;
+const getPATCount = () =>
+  Object.keys(process.env).filter((key) => /PAT_\d*$/.exec(key)).length;
+
+const getMaxRetries = () => (process.env.NODE_ENV === "test" ? 7 : getPATCount());
 
 /**
  * @typedef {import("axios").AxiosResponse} AxiosResponse Axios response.
@@ -25,11 +25,15 @@ const RETRIES = process.env.NODE_ENV === "test" ? 7 : PATs;
  * @returns {Promise<any>} The response from the fetcher function.
  */
 const retryer = async (fetcher, variables, retries = 0) => {
-  if (!RETRIES) {
+  // Ensure PAT_1 can be loaded in local dev before we decide we have "no tokens".
+  loadDotenv();
+
+  const MAX_RETRIES = getMaxRetries();
+  if (!MAX_RETRIES) {
     throw new CustomError("No GitHub API tokens found", CustomError.NO_TOKENS);
   }
 
-  if (retries > RETRIES) {
+  if (retries > MAX_RETRIES) {
     throw new CustomError(
       "Downtime due to GitHub API rate limiting",
       CustomError.MAX_RETRY,
@@ -93,5 +97,5 @@ const retryer = async (fetcher, variables, retries = 0) => {
   }
 };
 
-export { retryer, RETRIES };
+export { retryer, getMaxRetries };
 export default retryer;

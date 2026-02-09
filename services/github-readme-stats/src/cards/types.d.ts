@@ -1,5 +1,6 @@
 type ThemeNames = keyof typeof import("../../themes/index.js");
 type RankIcon = "default" | "github" | "percentile";
+type CardStyle = "none" | "space" | "arcade" | "space-arcade" | "space_arcade";
 
 export type CommonOptions = {
   title_color: string;
@@ -7,6 +8,7 @@ export type CommonOptions = {
   text_color: string;
   bg_color: string;
   theme: ThemeNames;
+  card_style?: CardStyle;
   border_radius: number;
   border_color: string;
   locale: string;

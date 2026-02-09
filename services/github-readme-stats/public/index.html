@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <meta
+      name="description"
+      content="Space Arcade playground for self-hosted github-readme-stats. Tweak themes, styles, and generate README snippets."
+    />
+    <title>GitHub Readme Stats · Space Arcade Lab</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <canvas id="starfield" aria-hidden="true"></canvas>
+
+    <div class="orb orb--a" aria-hidden="true"></div>
+    <div class="orb orb--b" aria-hidden="true"></div>
+
+    <main class="shell">
+      <header class="top">
+        <div class="brand">
+          <div class="badge" aria-hidden="true">
+            <span class="badge__dot"></span>
+            <span class="badge__dot"></span>
+            <span class="badge__dot"></span>
+          </div>
+          <div class="brand__title">
+            <div class="brand__kicker">Space Arcade</div>
+            <h1>GitHub Readme Stats</h1>
+          </div>
+        </div>
+
+        <div class="links">
+          <a class="chip" href="/upstream" rel="noreferrer" target="_blank">
+            Upstream repo
+          </a>
+          <a class="chip" href="/api?username=V0hgg" target="_blank">API</a>
+        </div>
+      </header>
+
+      <section class="grid">
+        <section class="panel">
+          <div class="panel__head">
+            <h2>Controls</h2>
+            <button class="btn btn--ghost" id="randomize" type="button">
+              Randomize
+            </button>
+          </div>
+
+          <form class="form" id="controls">
+            <label class="field">
+              <span class="field__label">GitHub username</span>
+              <input
+                class="field__input"
+                id="username"
+                name="username"
+                autocomplete="off"
+                spellcheck="false"
+                placeholder="V0hgg"
+              />
+            </label>
+
+            <div class="row">
+              <label class="field">
+                <span class="field__label">Card style</span>
+                <select class="field__input" id="cardStyle" name="cardStyle">
+                  <option value="space-arcade">Space + Arcade</option>
+                  <option value="space">Space</option>
+                  <option value="arcade">Arcade</option>
+                  <option value="">None</option>
+                </select>
+              </label>
+
+              <label class="field">
+                <span class="field__label">Cache (seconds)</span>
+                <input
+                  class="field__input"
+                  id="cacheSeconds"
+                  name="cacheSeconds"
+                  inputmode="numeric"
+                  value="21600"
+                />
+              </label>
+            </div>
+
+            <div class="row">
+              <label class="toggle">
+                <input id="showIcons" type="checkbox" checked />
+                <span class="toggle__ui" aria-hidden="true"></span>
+                <span class="toggle__label">Show icons</span>
+              </label>
+
+              <label class="toggle">
+                <input id="includeAllCommits" type="checkbox" checked />
+                <span class="toggle__ui" aria-hidden="true"></span>
+                <span class="toggle__label">Include all commits</span>
+              </label>
+            </div>
+
+            <div class="row">
+              <label class="toggle">
+                <input id="hideBorder" type="checkbox" checked />
+                <span class="toggle__ui" aria-hidden="true"></span>
+                <span class="toggle__label">Hide border</span>
+              </label>
+
+              <label class="toggle">
+                <input id="compactLangs" type="checkbox" checked />
+                <span class="toggle__ui" aria-hidden="true"></span>
+                <span class="toggle__label">Compact languages</span>
+              </label>
+            </div>
+
+            <label class="field">
+              <span class="field__label">Theme</span>
+              <select class="field__input" id="theme" name="theme">
+                <option value="space_arcade_gradient">space_arcade_gradient</option>
+                <option value="space_arcade">space_arcade</option>
+                <option value="neon_circuit_gradient">neon_circuit_gradient</option>
+                <option value="neon_circuit">neon_circuit</option>
+                <option value="tokyonight">tokyonight</option>
+                <option value="dracula">dracula</option>
+                <option value="dark">dark</option>
+              </select>
+            </label>
+          </form>
+
+          <div class="panel__foot">
+            <button class="btn" id="copyMarkdown" type="button">
+              Copy README Markdown
+            </button>
+            <button class="btn btn--ghost" id="openStats" type="button">
+              Open cards
+            </button>
+          </div>
+        </section>
+
+        <section class="panel panel--preview">
+          <div class="panel__head">
+            <h2>Preview</h2>
+            <div class="hint">
+              Hover to tilt. Toggle style/theme for space toys and arcade drift.
+            </div>
+          </div>
+
+          <div class="preview">
+            <div class="preview__card" id="statsWrap">
+              <div class="preview__label">Stats</div>
+              <img id="statsImg" alt="GitHub stats card preview" />
+            </div>
+
+            <div class="preview__card" id="langsWrap">
+              <div class="preview__label">Top languages</div>
+              <img id="langsImg" alt="Top languages card preview" />
+            </div>
+          </div>
+
+          <div class="code">
+            <div class="code__head">
+              <h3>README snippet</h3>
+              <button class="btn btn--ghost btn--tiny" id="copyCode" type="button">
+                Copy
+              </button>
+            </div>
+            <pre class="code__box"><code id="mdOut"></code></pre>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

@@ -265,6 +265,7 @@ const renderWakatimeCard = (stats = {}, options = { hide: [] }) => {
     border_color,
     display_format = "time",
     disable_animations,
+    card_style,
   } = options;
 
   const normalizedWidth = normalizeCardWidth({ value: card_width, layout });
@@ -441,6 +442,7 @@ const renderWakatimeCard = (stats = {}, options = { hide: [] }) => {
 
   card.setHideBorder(hide_border);
   card.setHideTitle(hide_title);
+  card.setCardStyle(card_style);
   card.setCSS(
     `
     ${cssStyles}

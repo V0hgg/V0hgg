@@ -797,6 +797,7 @@ const renderTopLanguages = (topLangs, options = {}) => {
     border_radius,
     border_color,
     disable_animations,
+    card_style,
     stats_format = "percentages",
   } = options;
 
@@ -891,6 +892,7 @@ const renderTopLanguages = (topLangs, options = {}) => {
 
   card.setHideBorder(hide_border);
   card.setHideTitle(hide_title);
+  card.setCardStyle(card_style);
   card.setCSS(
     `
     @keyframes slideInAnimation {
