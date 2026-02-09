@@ -8,7 +8,7 @@
       name="description"
       content="Space Arcade playground for self-hosted github-readme-stats. Tweak themes, styles, and generate README snippets."
     />
-    <title>GitHub Readme Stats · Space Arcade Lab</title>
+    <title>GitHub Readme Stats · Cosmic Clock Lab</title>
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
@@ -26,7 +26,7 @@
             <span class="badge__dot"></span>
           </div>
           <div class="brand__title">
-            <div class="brand__kicker">Space Arcade</div>
+            <div class="brand__kicker">Cosmic Clock</div>
             <h1>GitHub Readme Stats</h1>
           </div>
         </div>
@@ -65,9 +65,11 @@
               <label class="field">
                 <span class="field__label">Card style</span>
                 <select class="field__input" id="cardStyle" name="cardStyle">
-                  <option value="space-arcade">Space + Arcade</option>
-                  <option value="space">Space</option>
-                  <option value="arcade">Arcade</option>
+                  <option value="space-auto">Space (timestamp)</option>
+                  <option value="space-blackhole">Space (black hole)</option>
+                  <option value="space-sun">Space (sun)</option>
+                  <option value="space-star">Space (star)</option>
+                  <option value="space-moon">Space (moon)</option>
                   <option value="">None</option>
                 </select>
               </label>
@@ -115,12 +117,11 @@
             <label class="field">
               <span class="field__label">Theme</span>
               <select class="field__input" id="theme" name="theme">
-                <option value="space_arcade_gradient">space_arcade_gradient</option>
-                <option value="space_arcade">space_arcade</option>
-                <option value="neon_circuit_gradient">neon_circuit_gradient</option>
-                <option value="neon_circuit">neon_circuit</option>
-                <option value="tokyonight">tokyonight</option>
-                <option value="dracula">dracula</option>
+                <option value="space_time_gradient">space_time_gradient (timestamp)</option>
+                <option value="space_blackhole_gradient">space_blackhole_gradient</option>
+                <option value="space_sun_gradient">space_sun_gradient</option>
+                <option value="space_star_gradient">space_star_gradient</option>
+                <option value="space_moon_gradient">space_moon_gradient</option>
                 <option value="dark">dark</option>
               </select>
             </label>
@@ -140,7 +141,7 @@
           <div class="panel__head">
             <h2>Preview</h2>
             <div class="hint">
-              Hover to tilt. Toggle style/theme for space toys and arcade drift.
+              Hover to tilt. Theme changes by timestamp when using space_time.
             </div>
           </div>
 

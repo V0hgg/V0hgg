@@ -55,7 +55,7 @@ class Card {
     this.a11yDesc = "";
 
     // Optional visual variant that can add decorative layers/animations.
-    // Examples: "space", "arcade", "space-arcade"
+    // Example: "space"
     this.cardStyle = "";
   }
 
@@ -99,7 +99,31 @@ class Card {
       this.cardStyle = "";
       return;
     }
-    this.cardStyle = normalized;
+    // Remove unsupported/old style tokens to keep backwards compatibility.
+    // (We only support space styling in this fork.)
+    this.cardStyle = normalized.replaceAll("arcade", "").replaceAll("__", "_");
+  }
+
+  /**
+   * Resolves the active "space scene" (celestial variant) for the card.
+   *
+   * Rules:
+   * - If the style string contains a known scene token, lock to it.
+   * - Otherwise choose deterministically based on the current timestamp in 6-hour buckets.
+   *
+   * @returns {"blackhole" | "sun" | "star" | "moon"} Scene name.
+   */
+  resolveSpaceScene() {
+    const s = this.cardStyle || "";
+    if (s.includes("blackhole") || s.includes("hole")) return "blackhole";
+    if (s.includes("sun")) return "sun";
+    if (s.includes("moon")) return "moon";
+    if (s.includes("star")) return "star";
+
+    const hour = new Date().getUTCHours();
+    const bucket = Math.max(0, Math.min(3, Math.floor(hour / 6)));
+    // 00-05 UTC: blackhole, 06-11 UTC: sun, 12-17 UTC: star, 18-23 UTC: moon
+    return /** @type {const} */ (["blackhole", "sun", "star", "moon"][bucket]);
   }
 
   /**
@@ -205,8 +229,6 @@ class Card {
 
     const isSpace =
       this.cardStyle.includes("space") || this.cardStyle.includes("cosmic");
-    const isArcade =
-      this.cardStyle.includes("arcade") || this.cardStyle.includes("game");
 
     const defs = [];
 
@@ -224,31 +246,65 @@ class Card {
     `);
 
     if (isSpace) {
+      // Common glow filter used by celestial objects.
       defs.push(`
-        <radialGradient id="sc-planet" cx="30%" cy="30%" r="75%">
-          <stop offset="0%" stop-color="${this.colors.titleColor}" stop-opacity="0.9" />
-          <stop offset="55%" stop-color="${this.colors.iconColor}" stop-opacity="0.45" />
+        <filter id="sp-glow" x="-60%" y="-60%" width="220%" height="220%">
+          <feGaussianBlur stdDeviation="7" result="blur" />
+          <feColorMatrix
+            in="blur"
+            type="matrix"
+            values="
+              1 0 0 0 0
+              0 1 0 0 0
+              0 0 1 0 0
+              0 0 0 0.9 0"
+            result="glow"
+          />
+          <feMerge>
+            <feMergeNode in="glow" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      `);
+
+      defs.push(`
+        <radialGradient id="sp-sun" cx="35%" cy="35%" r="75%">
+          <stop offset="0%" stop-color="${this.colors.iconColor}" stop-opacity="0.95" />
+          <stop offset="55%" stop-color="${this.colors.titleColor}" stop-opacity="0.55" />
           <stop offset="100%" stop-color="${this.colors.borderColor}" stop-opacity="0" />
         </radialGradient>
-        <linearGradient id="sc-comet" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stop-color="${this.colors.iconColor}" stop-opacity="0" />
-          <stop offset="55%" stop-color="${this.colors.iconColor}" stop-opacity="0.6" />
-          <stop offset="100%" stop-color="${this.colors.titleColor}" stop-opacity="0.9" />
-        </linearGradient>
-      `);
-    }
 
-    if (isArcade) {
-      defs.push(`
-        <pattern id="ac-grid" width="18" height="18" patternUnits="userSpaceOnUse">
-          <path d="M18 0H0V18" fill="none" stroke="${this.colors.borderColor}" stroke-opacity="0.18" stroke-width="1" />
+        <radialGradient id="sp-moon" cx="30%" cy="25%" r="75%">
+          <stop offset="0%" stop-color="${this.colors.textColor}" stop-opacity="0.85" />
+          <stop offset="55%" stop-color="${this.colors.borderColor}" stop-opacity="0.35" />
+          <stop offset="100%" stop-color="${this.colors.borderColor}" stop-opacity="0" />
+        </radialGradient>
+
+        <pattern id="sp-craters" width="28" height="28" patternUnits="userSpaceOnUse">
+          <circle cx="7" cy="11" r="2.2" fill="${this.colors.borderColor}" fill-opacity="0.22" />
+          <circle cx="18" cy="8" r="1.6" fill="${this.colors.borderColor}" fill-opacity="0.16" />
+          <circle cx="20" cy="20" r="2.5" fill="${this.colors.borderColor}" fill-opacity="0.18" />
+          <circle cx="10" cy="23" r="1.4" fill="${this.colors.borderColor}" fill-opacity="0.14" />
         </pattern>
-        <linearGradient id="ac-scan" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="${this.colors.iconColor}" stop-opacity="0" />
-          <stop offset="40%" stop-color="${this.colors.iconColor}" stop-opacity="0.12" />
-          <stop offset="60%" stop-color="${this.colors.titleColor}" stop-opacity="0.08" />
-          <stop offset="100%" stop-color="${this.colors.titleColor}" stop-opacity="0" />
+
+        <radialGradient id="sp-hole" cx="50%" cy="50%" r="60%">
+          <stop offset="0%" stop-color="#000000" stop-opacity="0.95" />
+          <stop offset="55%" stop-color="#000000" stop-opacity="0.88" />
+          <stop offset="100%" stop-color="${this.colors.borderColor}" stop-opacity="0" />
+        </radialGradient>
+
+        <linearGradient id="sp-disk" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="${this.colors.titleColor}" stop-opacity="0" />
+          <stop offset="45%" stop-color="${this.colors.titleColor}" stop-opacity="0.65" />
+          <stop offset="55%" stop-color="${this.colors.iconColor}" stop-opacity="0.75" />
+          <stop offset="100%" stop-color="${this.colors.iconColor}" stop-opacity="0" />
         </linearGradient>
+
+        <radialGradient id="sp-star" cx="50%" cy="50%" r="60%">
+          <stop offset="0%" stop-color="${this.colors.textColor}" stop-opacity="0.95" />
+          <stop offset="55%" stop-color="${this.colors.titleColor}" stop-opacity="0.55" />
+          <stop offset="100%" stop-color="${this.colors.borderColor}" stop-opacity="0" />
+        </radialGradient>
       `);
     }
 
@@ -271,12 +327,12 @@ class Card {
 
     const isSpace =
       this.cardStyle.includes("space") || this.cardStyle.includes("cosmic");
-    const isArcade =
-      this.cardStyle.includes("arcade") || this.cardStyle.includes("game");
 
     const layers = [];
 
     if (isSpace) {
+      const scene = this.resolveSpaceScene();
+
       const stars = [
         [0.08, 0.18, 1.2, 0],
         [0.14, 0.58, 0.9, 220],
@@ -297,54 +353,83 @@ class Card {
           const cx = (w * xr).toFixed(2);
           const cy = (h * yr).toFixed(2);
           const delay = `${d}ms`;
-          const cls = i % 3 === 0 ? "sc-star sc-star--big" : "sc-star";
+          const cls = i % 3 === 0 ? "sp-star sp-star--big" : "sp-star";
           return `<circle class="${cls}" cx="${cx}" cy="${cy}" r="${r}" style="animation-delay:${delay}" />`;
         })
         .join("\n");
 
-      const planetX = w + 35;
-      const planetY = h + 20;
+      const obj = (() => {
+        const baseR = Math.max(54, Math.min(92, Math.round(w * 0.18)));
+
+        if (scene === "sun") {
+          const x = w + Math.round(baseR * 0.35);
+          const y = Math.round(h * 0.28);
+          return `
+            <g class="sp-sun" transform="translate(${x}, ${y})" filter="url(#sp-glow)">
+              <circle class="sp-sun__halo" r="${baseR + 18}" fill="url(#sp-sun)" opacity="0.42" />
+              <circle class="sp-sun__core" r="${baseR}" fill="url(#sp-sun)" opacity="0.85" />
+              <g class="sp-sun__flares">
+                <path d="M0 ${-baseR - 12} L0 ${-baseR - 30}" />
+                <path d="M${baseR + 12} 0 L${baseR + 32} 0" />
+                <path d="M0 ${baseR + 12} L0 ${baseR + 30}" />
+                <path d="M${-baseR - 12} 0 L${-baseR - 32} 0" />
+                <path d="M${(baseR * 0.72).toFixed(1)} ${(-baseR * 0.72).toFixed(1)} L${(baseR * 0.92).toFixed(1)} ${(-baseR * 0.92).toFixed(1)}" />
+                <path d="M${(baseR * 0.72).toFixed(1)} ${(baseR * 0.72).toFixed(1)} L${(baseR * 0.92).toFixed(1)} ${(baseR * 0.92).toFixed(1)}" />
+              </g>
+            </g>
+          `;
+        }
+
+        if (scene === "moon") {
+          const x = w + Math.round(baseR * 0.35);
+          const y = Math.round(h * 0.30);
+          return `
+            <g class="sp-moon" transform="translate(${x}, ${y})">
+              <circle class="sp-moon__body" r="${baseR}" fill="url(#sp-moon)" opacity="0.78" />
+              <circle class="sp-moon__craters" r="${baseR}" fill="url(#sp-craters)" opacity="0.22" />
+              <circle class="sp-moon__rim" r="${baseR}" fill="none" stroke="${this.colors.borderColor}" stroke-opacity="0.16" stroke-width="3" />
+            </g>
+          `;
+        }
+
+        if (scene === "blackhole") {
+          const x = w + Math.round(baseR * 0.30);
+          const y = h + Math.round(baseR * 0.10);
+          return `
+            <g class="sp-hole" transform="translate(${x}, ${y})">
+              <g class="sp-hole__disk" filter="url(#sp-glow)">
+                <ellipse rx="${Math.round(baseR * 1.75)}" ry="${Math.round(baseR * 0.42)}" fill="none" stroke="url(#sp-disk)" stroke-width="7" stroke-linecap="round" />
+                <ellipse rx="${Math.round(baseR * 1.35)}" ry="${Math.round(baseR * 0.30)}" fill="none" stroke="url(#sp-disk)" stroke-width="4" stroke-linecap="round" opacity="0.7" />
+              </g>
+              <circle class="sp-hole__core" r="${Math.round(baseR * 0.92)}" fill="url(#sp-hole)" />
+              <circle class="sp-hole__event" r="${Math.round(baseR * 0.62)}" fill="#000000" opacity="0.92" />
+              <path class="sp-hole__lensing" d="M${-Math.round(baseR * 1.2)} ${-Math.round(baseR * 0.15)} C${-Math.round(baseR * 0.4)} ${-Math.round(baseR * 0.55)}, ${Math.round(baseR * 0.4)} ${-Math.round(baseR * 0.55)}, ${Math.round(baseR * 1.2)} ${-Math.round(baseR * 0.15)}" />
+            </g>
+          `;
+        }
+
+        // "star"
+        const x = Math.round(w * 0.72);
+        const y = Math.round(h * 0.22);
+        const ray = Math.max(18, Math.round(baseR * 0.38));
+        return `
+          <g class="sp-starburst" transform="translate(${x}, ${y})" filter="url(#sp-glow)">
+            <circle class="sp-starburst__halo" r="${Math.round(ray * 0.95)}" fill="url(#sp-star)" opacity="0.24" />
+            <circle class="sp-starburst__core" r="${Math.max(7, Math.round(ray * 0.34))}" fill="url(#sp-star)" opacity="0.92" />
+            <g class="sp-starburst__rays">
+              <path d="M0 ${-ray} L0 ${ray}" />
+              <path d="M${-ray} 0 L${ray} 0" />
+              <path d="M${-Math.round(ray * 0.72)} ${-Math.round(ray * 0.72)} L${Math.round(ray * 0.72)} ${Math.round(ray * 0.72)}" />
+              <path d="M${-Math.round(ray * 0.72)} ${Math.round(ray * 0.72)} L${Math.round(ray * 0.72)} ${-Math.round(ray * 0.72)}" />
+            </g>
+          </g>
+        `;
+      })();
 
       layers.push(`
-        <g class="sc-space" clip-path="url(#${clipId})">
-          <g class="sc-stars">${starNodes}</g>
-
-          <g class="sc-orbit" transform="translate(${(w * 0.74).toFixed(2)}, ${(h * 0.32).toFixed(2)})">
-            <circle class="sc-moon" cx="0" cy="0" r="4" />
-            <circle class="sc-moon sc-moon--ghost" cx="0" cy="0" r="9" />
-          </g>
-
-          <g class="sc-planet" transform="translate(${planetX}, ${planetY})">
-            <circle r="${Math.max(55, Math.min(90, Math.round(w * 0.18)))}" fill="url(#sc-planet)" />
-            <ellipse class="sc-ring" rx="${Math.max(72, Math.min(110, Math.round(w * 0.23)))}" ry="${Math.max(14, Math.min(22, Math.round(w * 0.04)))}" />
-          </g>
-
-          <g class="sc-ship" transform="translate(${(w * 0.10).toFixed(2)}, ${(h * 0.76).toFixed(2)})">
-            <path class="sc-ship-body" d="M0 0 L18 7 L0 14 L5 7 Z" />
-            <path class="sc-ship-glow" d="M-10 7 L4 7" />
-          </g>
-
-          <g class="sc-comet">
-            <rect x="${(w * 0.55).toFixed(2)}" y="${(h * 0.08).toFixed(2)}" width="${Math.max(70, Math.round(w * 0.22))}" height="2.2" rx="2" fill="url(#sc-comet)" />
-          </g>
-        </g>
-      `);
-    }
-
-    if (isArcade) {
-      layers.push(`
-        <g class="ac-arcade" clip-path="url(#${clipId})">
-          <rect class="ac-grid" x="0" y="0" width="${w}" height="${h}" fill="url(#ac-grid)" />
-          <rect class="ac-scan" x="0" y="-${h}" width="${w}" height="${h}" fill="url(#ac-scan)" />
-
-          <g class="ac-sprite" transform="translate(${(w * 0.78).toFixed(2)}, ${(h * 0.18).toFixed(2)})">
-            <rect class="ac-px" x="0" y="0" width="4" height="4" rx="1" />
-            <rect class="ac-px" x="6" y="0" width="4" height="4" rx="1" />
-            <rect class="ac-px" x="12" y="0" width="4" height="4" rx="1" />
-            <rect class="ac-px" x="6" y="6" width="4" height="4" rx="1" />
-            <rect class="ac-px" x="0" y="12" width="4" height="4" rx="1" />
-            <rect class="ac-px" x="12" y="12" width="4" height="4" rx="1" />
-          </g>
+        <g class="sp-space sp-space--${scene}" clip-path="url(#${clipId})">
+          <g class="sp-stars">${starNodes}</g>
+          ${obj}
         </g>
       `);
     }
@@ -388,61 +473,52 @@ class Card {
 
     const isSpace =
       this.cardStyle.includes("space") || this.cardStyle.includes("cosmic");
-    const isArcade =
-      this.cardStyle.includes("arcade") || this.cardStyle.includes("game");
 
     const extra = [];
 
     if (isSpace) {
       extra.push(`
-        .sc-space { opacity: 0.9; }
-        .sc-star { fill: ${this.colors.textColor}; opacity: 0.30; animation: scTwinkle 2.8s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
-        .sc-star--big { opacity: 0.42; }
-        .sc-orbit { animation: scOrbit 6s linear infinite; transform-origin: center; }
-        .sc-moon { fill: ${this.colors.borderColor}; opacity: 0.35; }
-        .sc-moon--ghost { fill: none; stroke: ${this.colors.borderColor}; stroke-opacity: 0.15; stroke-width: 1; }
-        .sc-planet { opacity: 0.55; }
-        .sc-ring { fill: none; stroke: ${this.colors.borderColor}; stroke-opacity: 0.20; stroke-width: 3; transform: rotate(-16deg); }
-        .sc-ship { animation: scDrift 4.5s ease-in-out infinite; }
-        .sc-ship-body { fill: ${this.colors.iconColor}; opacity: 0.85; }
-        .sc-ship-glow { stroke: ${this.colors.titleColor}; stroke-opacity: 0.6; stroke-width: 2.5; stroke-linecap: round; filter: drop-shadow(0 0 6px ${this.colors.titleColor}); }
-        .sc-comet { opacity: 0.7; animation: scComet 5.5s ease-in-out infinite; }
+        .sp-space { opacity: 0.9; }
+        .sp-star { fill: ${this.colors.textColor}; opacity: 0.28; animation: spTwinkle 2.9s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+        .sp-star--big { opacity: 0.42; }
 
-        @keyframes scTwinkle {
+        .sp-sun { animation: spFloat 6.5s ease-in-out infinite; }
+        .sp-sun__flares path { stroke: ${this.colors.iconColor}; stroke-opacity: 0.55; stroke-width: 3.2; stroke-linecap: round; animation: spFlares 3.6s ease-in-out infinite; }
+
+        .sp-moon { animation: spFloat 7.5s ease-in-out infinite; }
+        .sp-moon__body { filter: drop-shadow(0 0 10px ${this.colors.borderColor}); }
+        .sp-moon__craters { animation: spCraters 4.2s ease-in-out infinite; }
+
+        .sp-hole { opacity: 0.88; }
+        .sp-hole__disk { animation: spSpin 6.2s linear infinite; transform-origin: center; }
+        .sp-hole__lensing { fill: none; stroke: ${this.colors.titleColor}; stroke-opacity: 0.26; stroke-width: 3.2; stroke-linecap: round; animation: spPulse 3.8s ease-in-out infinite; }
+
+        .sp-starburst { animation: spPulse 2.8s ease-in-out infinite; }
+        .sp-starburst__rays path { stroke: ${this.colors.titleColor}; stroke-opacity: 0.42; stroke-width: 3.0; stroke-linecap: round; }
+
+        @keyframes spTwinkle {
           0%, 100% { opacity: 0.18; transform: scale(0.95); }
           50% { opacity: 0.65; transform: scale(1.06); }
         }
-        @keyframes scOrbit {
-          from { transform: rotate(0deg) translateX(14px) rotate(0deg); }
-          to { transform: rotate(360deg) translateX(14px) rotate(-360deg); }
+        @keyframes spSpin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
         }
-        @keyframes scDrift {
+        @keyframes spFloat {
           0%, 100% { transform: translate(0px, 0px) rotate(-1deg); }
           50% { transform: translate(10px, -5px) rotate(2deg); }
         }
-        @keyframes scComet {
-          0%, 100% { transform: translate(0px, 0px); opacity: 0.3; }
-          35% { transform: translate(18px, 10px); opacity: 0.75; }
-          65% { transform: translate(-8px, -6px); opacity: 0.55; }
+        @keyframes spPulse {
+          0%, 100% { opacity: 0.22; transform: scale(0.98); }
+          50% { opacity: 0.78; transform: scale(1.03); }
         }
-      `);
-    }
-
-    if (isArcade) {
-      extra.push(`
-        .ac-arcade { opacity: 0.9; }
-        .ac-grid { opacity: 0.35; }
-        .ac-scan { opacity: 0.65; animation: acScan 3.8s linear infinite; }
-        .ac-sprite { animation: acBounce 1.6s ease-in-out infinite; }
-        .ac-px { fill: ${this.colors.iconColor}; opacity: 0.72; filter: drop-shadow(0 0 6px ${this.colors.iconColor}); }
-
-        @keyframes acScan {
-          from { transform: translateY(0); }
-          to { transform: translateY(${this.height * 2}px); }
+        @keyframes spFlares {
+          0%, 100% { stroke-opacity: 0.22; }
+          50% { stroke-opacity: 0.78; }
         }
-        @keyframes acBounce {
-          0%, 100% { transform: translate(0px, 0px) rotate(0deg); }
-          50% { transform: translate(-8px, 7px) rotate(3deg); }
+        @keyframes spCraters {
+          0%, 100% { opacity: 0.16; }
+          50% { opacity: 0.32; }
         }
       `);
     }

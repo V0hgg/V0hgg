@@ -480,21 +480,63 @@ export const themes = {
     border_color: "2cf8ff",
     bg_color: "135,05060a,0b1226,0c0033",
   },
-  // Custom: playful space arcade palette.
-  space_arcade: {
-    title_color: "7df9ff", // neon cyan
-    text_color: "e7fbff", // ice
-    icon_color: "ffe45e", // arcade yellow
-    border_color: "7df9ff",
-    bg_color: "070a18", // deep space
-  },
-  // Same palette with a nebula-like gradient.
-  space_arcade_gradient: {
-    title_color: "7df9ff",
+  // Custom: space palettes for the "Cosmic Clock" card style.
+  // These are used by `theme=space_*` values and time-based themes resolved at runtime.
+  space_blackhole: {
+    title_color: "c77dff",
     text_color: "e7fbff",
-    icon_color: "ffe45e",
+    icon_color: "ff4fd8",
+    border_color: "6f2dbd",
+    bg_color: "05060a",
+  },
+  space_blackhole_gradient: {
+    title_color: "c77dff",
+    text_color: "e7fbff",
+    icon_color: "ff4fd8",
+    border_color: "6f2dbd",
+    bg_color: "140,05060a,070a18,0c0033,000000",
+  },
+  space_sun: {
+    title_color: "ffe45e",
+    text_color: "fff6c7",
+    icon_color: "ff9f1c",
+    border_color: "ffe45e",
+    bg_color: "070a18",
+  },
+  space_sun_gradient: {
+    title_color: "ffe45e",
+    text_color: "fff6c7",
+    icon_color: "ff9f1c",
+    border_color: "ffe45e",
+    bg_color: "140,05060a,070a18,2b1900,12000a",
+  },
+  space_star: {
+    title_color: "e7fbff",
+    text_color: "b8fff5",
+    icon_color: "7df9ff",
     border_color: "7df9ff",
-    bg_color: "140,05060a,070a18,1a0f3d,012a4a",
+    bg_color: "070a18",
+  },
+  space_star_gradient: {
+    title_color: "e7fbff",
+    text_color: "b8fff5",
+    icon_color: "7df9ff",
+    border_color: "7df9ff",
+    bg_color: "140,05060a,070a18,012a4a,1a0f3d",
+  },
+  space_moon: {
+    title_color: "a8c7ff",
+    text_color: "e7fbff",
+    icon_color: "7df9ff",
+    border_color: "a8c7ff",
+    bg_color: "070a18",
+  },
+  space_moon_gradient: {
+    title_color: "a8c7ff",
+    text_color: "e7fbff",
+    icon_color: "7df9ff",
+    border_color: "a8c7ff",
+    bg_color: "140,05060a,070a18,041b3a,0b1226",
   },
 };
 

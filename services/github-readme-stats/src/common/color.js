@@ -2,6 +2,16 @@
 
 import { themes } from "../../themes/index.js";
 
+const resolveSpaceTimeTheme = (theme) => {
+  if (theme !== "space_time" && theme !== "space_time_gradient") return theme;
+
+  const hour = new Date().getUTCHours();
+  const bucket = Math.max(0, Math.min(3, Math.floor(hour / 6)));
+  const sceneKeys = ["space_blackhole", "space_sun", "space_star", "space_moon"];
+  const base = sceneKeys[bucket];
+  return theme.endsWith("_gradient") ? `${base}_gradient` : base;
+};
+
 /**
  * Checks if a string is a valid hex color.
  *
@@ -85,19 +95,23 @@ const getCardColors = ({
   const defaultTheme = themes["default"];
   const isThemeProvided = theme !== null && theme !== undefined;
 
+  // Support time-based themes without needing a static entry in `themes`.
+  const resolvedTheme = isThemeProvided ? resolveSpaceTimeTheme(theme) : theme;
+
   // @ts-ignore
-  const selectedTheme = isThemeProvided ? themes[theme] : defaultTheme;
+  const selectedTheme = isThemeProvided ? themes[resolvedTheme] : defaultTheme;
+  const safeTheme = selectedTheme || defaultTheme;
 
   const defaultBorderColor =
-    "border_color" in selectedTheme
-      ? selectedTheme.border_color
+    "border_color" in safeTheme
+      ? safeTheme.border_color
       : // @ts-ignore
         defaultTheme.border_color;
 
   // get the color provided by the user else the theme color
   // finally if both colors are invalid fallback to default theme
   const titleColor = fallbackColor(
-    title_color || selectedTheme.title_color,
+    title_color || safeTheme.title_color,
     "#" + defaultTheme.title_color,
   );
 
@@ -105,19 +119,19 @@ const getCardColors = ({
   // finally if both colors are invalid we use the titleColor
   const ringColor = fallbackColor(
     // @ts-ignore
-    ring_color || selectedTheme.ring_color,
+    ring_color || safeTheme.ring_color,
     titleColor,
   );
   const iconColor = fallbackColor(
-    icon_color || selectedTheme.icon_color,
+    icon_color || safeTheme.icon_color,
     "#" + defaultTheme.icon_color,
   );
   const textColor = fallbackColor(
-    text_color || selectedTheme.text_color,
+    text_color || safeTheme.text_color,
     "#" + defaultTheme.text_color,
   );
   const bgColor = fallbackColor(
-    bg_color || selectedTheme.bg_color,
+    bg_color || safeTheme.bg_color,
     "#" + defaultTheme.bg_color,
   );
 

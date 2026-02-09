@@ -1,6 +1,13 @@
 type ThemeNames = keyof typeof import("../../themes/index.js");
 type RankIcon = "default" | "github" | "percentile";
-type CardStyle = "none" | "space" | "arcade" | "space-arcade" | "space_arcade";
+type CardStyle =
+  | "none"
+  | "space"
+  | "space-auto"
+  | "space-blackhole"
+  | "space-sun"
+  | "space-star"
+  | "space-moon";
 
 export type CommonOptions = {
   title_color: string;

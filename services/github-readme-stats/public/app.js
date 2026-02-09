@@ -19,12 +19,11 @@ const els = {
 };
 
 const themeChoices = [
-  "space_arcade_gradient",
-  "space_arcade",
-  "neon_circuit_gradient",
-  "neon_circuit",
-  "tokyonight",
-  "dracula",
+  "space_time_gradient",
+  "space_blackhole_gradient",
+  "space_sun_gradient",
+  "space_star_gradient",
+  "space_moon_gradient",
   "dark",
 ];
 
@@ -35,7 +34,7 @@ function safeInt(value, fallback) {
 
 function buildUrls() {
   const username = (els.username.value || "V0hgg").trim();
-  const theme = els.theme.value || "space_arcade_gradient";
+  const theme = els.theme.value || "space_time_gradient";
   const card_style = els.cardStyle.value;
   const cache_seconds = safeInt(els.cacheSeconds.value, 21600);
   const hide_border = els.hideBorder.checked ? "true" : "false";
@@ -54,7 +53,7 @@ function buildUrls() {
   langs.set("layout", els.compactLangs.checked ? "compact" : "normal");
   langs.set("hide_border", hide_border);
   // Top-langs looks nicer without the gradient background by default.
-  langs.set("theme", theme === "space_arcade_gradient" ? "space_arcade" : theme);
+  langs.set("theme", theme.replace(/_gradient$/, ""));
   if (card_style) langs.set("card_style", card_style);
   langs.set("cache_seconds", String(cache_seconds));
 
@@ -127,8 +126,8 @@ qs("#controls").addEventListener("input", () => update());
 
 // Initial state
 els.username.value = "V0hgg";
-els.theme.value = "space_arcade_gradient";
-els.cardStyle.value = "space-arcade";
+els.theme.value = "space_time_gradient";
+els.cardStyle.value = "space-auto";
 update();
 
 // ---- Starfield ----
