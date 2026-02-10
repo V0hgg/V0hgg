@@ -3,7 +3,6 @@ import Starfield from "./components/Starfield.jsx";
 import Tilt from "./components/Tilt.jsx";
 import CopyButton from "./components/CopyButton.jsx";
 import SceneRail from "./components/SceneRail.jsx";
-import AiDirector from "./components/AiDirector.jsx";
 import { getScenePalette, resolveScene } from "./lib/cosmic.js";
 import { buildReadmeMarkdown, buildTelemetryPath } from "./lib/url.js";
 
@@ -85,41 +84,6 @@ export default function App() {
   const randomize = useCallback(() => {
     const pick = themeChoices[Math.floor(Math.random() * themeChoices.length)];
     setTheme(pick.id);
-  }, []);
-
-  const [aiEnabled, setAiEnabled] = useState(false);
-  useEffect(() => {
-    let alive = true;
-    fetch("/api/lab-ai-status")
-      .then((r) => r.json())
-      .then((data) => {
-        if (!alive) return;
-        setAiEnabled(Boolean(data?.enabled));
-      })
-      .catch(() => {
-        if (!alive) return;
-        setAiEnabled(false);
-      });
-    return () => {
-      alive = false;
-    };
-  }, []);
-
-  const applyPreset = useCallback((preset) => {
-    if (!preset || typeof preset !== "object") return;
-
-    if (typeof preset.username === "string") setUsername(preset.username);
-    if (typeof preset.theme === "string") setTheme(preset.theme);
-
-    if (typeof preset.sceneMode === "string") setSceneMode(preset.sceneMode);
-    if (typeof preset.cacheSeconds !== "undefined")
-      setCacheSeconds(safeInt(preset.cacheSeconds, 21600));
-    if (typeof preset.langsCount !== "undefined")
-      setLangsCount(safeInt(preset.langsCount, 6));
-
-    if (typeof preset.includeAllCommits === "boolean")
-      setIncludeAllCommits(preset.includeAllCommits);
-    if (typeof preset.hideBorder === "boolean") setHideBorder(preset.hideBorder);
   }, []);
 
   return (
@@ -240,8 +204,6 @@ export default function App() {
               </label>
             </div>
           </div>
-
-          <AiDirector enabled={aiEnabled} onApplyPreset={applyPreset} />
 
           <div className="panel__foot">
             <CopyButton text={snippet} label="Copy README Snippet" copiedLabel="Copied" />

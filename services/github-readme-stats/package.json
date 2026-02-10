@@ -67,10 +67,7 @@
     "vite": "^6.3.5"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^3.0.7",
-    "@ai-sdk/react": "^3.0.44",
     "axios": "^1.13.1",
-    "ai": "^6.0.42",
     "dotenv": "^17.2.3",
     "emoji-name-map": "^2.0.3",
     "github-username-regex": "^1.0.0",
