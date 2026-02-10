@@ -32,6 +32,38 @@ body {
   height: 100%;
 }
 
+.shell {
+  position: relative;
+  min-height: 100%;
+}
+
+.heroBg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.heroBg__canvas {
+  position: absolute !important;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.heroBg__veil {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      circle at 60% 50%,
+      color-mix(in oklab, var(--accent) 9%, transparent),
+      transparent 62%
+    ),
+    radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.62), transparent 74%);
+  opacity: 1;
+}
+
 body {
   margin: 0;
   color: var(--ink);
@@ -81,6 +113,154 @@ body::before {
   pointer-events: none;
   background: radial-gradient(circle at 60% 40%, transparent 0%, rgba(0, 0, 0, 0.56) 68%, rgba(0, 0, 0, 0.82) 100%);
   opacity: 0.9;
+}
+
+.hero {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  scroll-margin-top: 80px;
+  display: flex;
+  align-items: flex-end;
+}
+
+.hero__inner {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 80px 24px 120px;
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 22px;
+  align-items: end;
+}
+
+.hero__kicker {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.38em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 18px;
+}
+
+.hero__name {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 600;
+  line-height: 0.92;
+  letter-spacing: -0.02em;
+  font-size: clamp(56px, 8.6vw, 140px);
+}
+
+.hero__glow {
+  text-shadow: 0 0 26px color-mix(in oklab, var(--accent) 40%, transparent);
+}
+
+.hero__rail {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 22px;
+}
+
+.hero__line {
+  height: 1px;
+  width: 144px;
+  background: linear-gradient(
+    90deg,
+    var(--accent),
+    rgba(243, 242, 237, 0.22),
+    transparent
+  );
+}
+
+.hero__tag {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.38em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.hero__actions {
+  margin-top: 26px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  pointer-events: auto;
+}
+
+.preview--hero .preview__frame {
+  box-shadow:
+    0 22px 90px rgba(0, 0, 0, 0.72),
+    0 0 0 1px color-mix(in oklab, var(--accent) 18%, transparent);
+}
+
+.hero__scroll {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 18px;
+  pointer-events: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 24px;
+  opacity: 0.95;
+}
+
+.hero__scrollLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hero__scrollLine {
+  width: 1px;
+  height: 36px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--accent) 72%, transparent),
+    rgba(243, 242, 237, 0.20),
+    transparent
+  );
+}
+
+.hero__scrollText {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.45em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.hero__scrollRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hero__scrollBar {
+  height: 2px;
+  width: 64px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(243, 242, 237, 0.20),
+    color-mix(in oklab, var(--accent) 72%, transparent)
+  );
+}
+
+.hero__scrollDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--accent) 82%, transparent);
+  box-shadow: 0 0 18px color-mix(in oklab, var(--accent) 34%, transparent);
 }
 
 .scanlines {
@@ -190,6 +370,10 @@ body::before {
   max-width: 1240px;
   margin: 0 auto;
   padding: 22px 12px 34px;
+}
+
+.top--lab {
+  margin: 26px 0 14px;
 }
 
 .top {
@@ -673,6 +857,13 @@ select.field__input {
 }
 
 @media (max-width: 980px) {
+  .hero__inner {
+    grid-template-columns: 1fr;
+    padding-bottom: 104px;
+  }
+  .hero__preview {
+    margin-top: 14px;
+  }
   .grid {
     grid-template-columns: 1fr;
   }
@@ -690,9 +881,6 @@ select.field__input {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
-  }
-  body::before {
-    animation: none;
   }
   .cosmic::after {
     animation: none;

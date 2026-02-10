@@ -71,8 +71,11 @@
     "dotenv": "^17.2.3",
     "emoji-name-map": "^2.0.3",
     "github-username-regex": "^1.0.0",
+    "@react-three/drei": "^10.6.0",
+    "@react-three/fiber": "^9.3.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "three": "^0.179.1",
     "word-wrap": "^1.2.5"
   },
   "lint-staged": {

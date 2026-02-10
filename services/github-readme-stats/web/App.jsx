@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import Starfield from "./components/Starfield.jsx";
+import BlackHoleBackdrop from "./components/BlackHoleBackdrop.jsx";
 import Tilt from "./components/Tilt.jsx";
 import CopyButton from "./components/CopyButton.jsx";
 import SceneRail from "./components/SceneRail.jsx";
@@ -21,6 +21,16 @@ function safeInt(value, fallback) {
 }
 
 export default function App() {
+  const [reducedMotion, setReducedMotion] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia?.("(prefers-reduced-motion: reduce)");
+    if (!mq) return;
+    const sync = () => setReducedMotion(Boolean(mq.matches));
+    sync();
+    mq.addEventListener?.("change", sync);
+    return () => mq.removeEventListener?.("change", sync);
+  }, []);
+
   const [username, setUsername] = useState("V0hgg");
   const [theme, setTheme] = useState("space_blackhole_gradient");
   const [sceneMode, setSceneMode] = useState("blackhole");
@@ -87,38 +97,77 @@ export default function App() {
   }, []);
 
   return (
-    <div className="app">
-      <Starfield />
+    <div className="shell">
+      <BlackHoleBackdrop reducedMotion={reducedMotion} />
       <div className="vignette" aria-hidden="true" />
-      <div className="cosmic" aria-hidden="true" />
 
-      <header className="top">
-        <div className="brand">
-          <div className="brand__badge" aria-hidden="true">
-            <span />
-            <span />
-            <span />
+      <section className="hero">
+        <div className="hero__inner">
+          <div className="hero__copy">
+            <div className="hero__kicker">Telemetry Lab</div>
+            <h1 className="hero__name">
+              <span className="hero__glow">{username || "V0hgg"}</span>
+            </h1>
+            <div className="hero__rail" aria-hidden="true">
+              <span className="hero__line" />
+              <span className="hero__tag">Readme Signal</span>
+            </div>
+
+            <div className="hero__actions">
+              <a className="chip" href="#lab">
+                Configure
+              </a>
+              <a className="chip" href={telemetryPath} target="_blank" rel="noreferrer">
+                Open SVG
+              </a>
+              <button className="chip chip--ghost" type="button" onClick={randomize}>
+                Randomize
+              </button>
+            </div>
           </div>
-          <div className="brand__text">
-            <div className="kicker">Telemetry Lab</div>
-            <div className="brand__title">GitHub Readme Stats</div>
+
+          <div className="hero__preview">
+            <Tilt className="preview preview--hero">
+              <div className="preview__frame">
+                <img className="preview__img" src={previewSrc} alt="Telemetry preview" />
+              </div>
+            </Tilt>
           </div>
         </div>
 
-        <nav className="nav">
-          <a className="chip" href="/upstream" target="_blank" rel="noreferrer">
-            Upstream
-          </a>
-          <a className="chip" href={telemetryPath} target="_blank" rel="noreferrer">
-            Open SVG
-          </a>
-          <button className="chip chip--ghost" type="button" onClick={randomize}>
-            Randomize
-          </button>
-        </nav>
-      </header>
+        <div className="hero__scroll" aria-hidden="true">
+          <div className="hero__scrollLeft">
+            <div className="hero__scrollLine" />
+            <div className="hero__scrollText">Scroll Down</div>
+          </div>
+          <div className="hero__scrollRight">
+            <div className="hero__scrollBar" />
+            <div className="hero__scrollDot" />
+          </div>
+        </div>
+      </section>
 
-      <main className="grid">
+      <main id="lab" className="app">
+        <div className="top top--lab">
+          <div className="brand">
+            <div className="brand__badge" aria-hidden="true">
+              <span />
+              <span />
+              <span />
+            </div>
+            <div className="brand__text">
+              <div className="kicker">Mission Control</div>
+              <div className="brand__title">Configure your mega-card</div>
+            </div>
+          </div>
+          <nav className="nav">
+            <a className="chip" href="/upstream" target="_blank" rel="noreferrer">
+              Upstream
+            </a>
+          </nav>
+        </div>
+
+        <div className="grid">
         <section className="panel">
           <div className="panel__head">
             <div>
@@ -244,6 +293,7 @@ export default function App() {
             </pre>
           </div>
         </section>
+        </div>
       </main>
 
       <footer className="foot">
