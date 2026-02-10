@@ -22,8 +22,8 @@ function safeInt(value, fallback) {
 
 export default function App() {
   const [username, setUsername] = useState("V0hgg");
-  const [theme, setTheme] = useState("space_time_gradient");
-  const [sceneMode, setSceneMode] = useState("auto");
+  const [theme, setTheme] = useState("space_blackhole_gradient");
+  const [sceneMode, setSceneMode] = useState("blackhole");
   const [cacheSeconds, setCacheSeconds] = useState(21600);
   const [langsCount, setLangsCount] = useState(6);
   const [includeAllCommits, setIncludeAllCommits] = useState(true);
@@ -90,7 +90,6 @@ export default function App() {
     <div className="app">
       <Starfield />
       <div className="vignette" aria-hidden="true" />
-      <div className="scanlines" aria-hidden="true" />
       <div className="cosmic" aria-hidden="true" />
 
       <header className="top">

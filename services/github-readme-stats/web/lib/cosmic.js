@@ -30,32 +30,32 @@ export function getScenePalette(scene) {
   switch (scene) {
     case "sun":
       return {
-        accent: "#ffd37a",
-        accent2: "#ff6ad5",
-        halo: "rgba(255, 211, 122, 0.28)",
-        haze: "rgba(255, 153, 80, 0.08)",
+        accent: "#f2d7a0",
+        accent2: "#cfa355",
+        halo: "rgba(242, 215, 160, 0.22)",
+        haze: "rgba(207, 163, 85, 0.07)",
       };
     case "moon":
       return {
-        accent: "#b7c7ff",
-        accent2: "#7df9ff",
-        halo: "rgba(183, 199, 255, 0.22)",
-        haze: "rgba(125, 249, 255, 0.06)",
+        accent: "#b9b3a7",
+        accent2: "#f2d7a0",
+        halo: "rgba(185, 179, 167, 0.18)",
+        haze: "rgba(242, 215, 160, 0.05)",
       };
     case "star":
       return {
-        accent: "#7df9ff",
-        accent2: "#39ff14",
-        halo: "rgba(125, 249, 255, 0.22)",
-        haze: "rgba(57, 255, 20, 0.05)",
+        accent: "#f3f2ed",
+        accent2: "#cfa355",
+        halo: "rgba(243, 242, 237, 0.20)",
+        haze: "rgba(207, 163, 85, 0.05)",
       };
     case "blackhole":
     default:
       return {
-        accent: "#7df9ff",
-        accent2: "#ff4fd8",
-        halo: "rgba(125, 249, 255, 0.22)",
-        haze: "rgba(255, 79, 216, 0.06)",
+        accent: "#cfa355",
+        accent2: "#f2d7a0",
+        halo: "rgba(207, 163, 85, 0.20)",
+        haze: "rgba(242, 215, 160, 0.06)",
       };
   }
 }
@@ -76,4 +76,3 @@ export function getSceneLabel(scene) {
       return "Moon";
   }
 }
-

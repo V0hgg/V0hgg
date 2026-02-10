@@ -140,8 +140,8 @@ const renderTelemetryCard = (stats, topLangs, options = {}) => {
   const rightW = W - rightX - P;
 
   const hudGreen = "#39ff14";
-  const hudDim = "rgba(231, 251, 255, 0.55)";
-  const hudLine = "rgba(125, 249, 255, 0.16)";
+  const hudDim = colors.textColor;
+  const hudLine = colors.borderColor;
 
   const name = encodeHTML(stats?.name || "");
 
@@ -314,21 +314,22 @@ const renderTelemetryCard = (stats, topLangs, options = {}) => {
     .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
 
     .hdr {
-      font: 800 18px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font: 800 18px ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
       fill: ${colors.titleColor};
-      letter-spacing: 0.10em;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
     }
 
     .sub {
-      font: 600 12px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font: 600 12px ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
       fill: ${hudDim};
+      opacity: 0.72;
       letter-spacing: 0.14em;
       text-transform: uppercase;
     }
 
     .h2 {
-      font: 800 13px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font: 800 13px ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
       fill: ${colors.titleColor};
       letter-spacing: 0.18em;
       text-transform: uppercase;
@@ -337,12 +338,14 @@ const renderTelemetryCard = (stats, topLangs, options = {}) => {
     .tile__bg {
       fill: rgba(0, 0, 0, 0.25);
       stroke: ${hudLine};
+      stroke-opacity: 0.24;
       stroke-width: 1;
     }
 
     .tile__k {
       font: 700 10px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       fill: ${hudDim};
+      opacity: 0.78;
       letter-spacing: 0.20em;
       text-transform: uppercase;
     }
@@ -355,28 +358,30 @@ const renderTelemetryCard = (stats, topLangs, options = {}) => {
     }
 
     .lang__name, .lang__pct {
-      font: 600 11px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      fill: rgba(231, 251, 255, 0.78);
+      font: 600 11px ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      fill: ${colors.textColor};
+      opacity: 0.80;
     }
 
     .lang__empty {
-      font: 600 11px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      fill: rgba(231, 251, 255, 0.55);
+      font: 600 11px ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      fill: ${colors.textColor};
+      opacity: 0.65;
       letter-spacing: 0.10em;
       text-transform: uppercase;
     }
 
     .lang__track {
-      fill: rgba(255, 255, 255, 0.07);
-      stroke: rgba(255, 255, 255, 0.06);
+      fill: rgba(243, 242, 237, 0.06);
+      stroke: rgba(243, 242, 237, 0.06);
     }
 
     .lang__fill {
-      filter: drop-shadow(0 0 10px rgba(125, 249, 255, 0.22));
+      filter: drop-shadow(0 0 10px rgba(207, 163, 85, 0.22));
     }
 
-    .st { fill: rgba(231, 251, 255, 0.26); animation: tw 3.0s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
-    .st--b { fill: rgba(231, 251, 255, 0.38); }
+    .st { fill: ${colors.textColor}; opacity: 0.22; animation: tw 3.0s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+    .st--b { fill: ${colors.textColor}; opacity: 0.34; }
 
     .grid {
       opacity: 0.65;
@@ -450,7 +455,7 @@ const renderTelemetryCard = (stats, topLangs, options = {}) => {
         </clipPath>
 
         <pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse">
-          <path d="M28 0H0V28" fill="none" stroke="rgba(125, 249, 255, 0.10)" stroke-width="1" />
+          <path d="M28 0H0V28" fill="none" stroke="${hudLine}" stroke-opacity="0.12" stroke-width="1" />
         </pattern>
 
         <linearGradient id="scan" x1="0" y1="0" x2="0" y2="1">

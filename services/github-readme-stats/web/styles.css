@@ -1,18 +1,22 @@
 :root {
-  --bg0: #05060a;
-  --bg1: #070a18;
-  --bg2: #0b1226;
-  --ink: rgba(231, 251, 255, 0.92);
-  --muted: rgba(231, 251, 255, 0.64);
-  --line: rgba(125, 249, 255, 0.16);
-  --accent: #7df9ff;
-  --accent2: #ff4fd8;
-  --halo: rgba(125, 249, 255, 0.22);
-  --haze: rgba(255, 79, 216, 0.06);
+  /* Palette matches /Users/hunter/v0hgg/portfolio (warm void + gold HUD). */
+  --bg0: #0a0a08;
+  --bg1: #11110e;
+  --bg2: #05060a;
+  --ink: rgba(243, 242, 237, 0.96);
+  --muted: rgba(185, 179, 167, 0.88);
+  --line: rgba(243, 242, 237, 0.14);
+  --accent: #cfa355;
+  --accent2: #f2d7a0;
+  --halo: rgba(207, 163, 85, 0.14);
+  --haze: rgba(242, 215, 160, 0.06);
   --signal: #39ff14;
   --shadow: rgba(0, 0, 0, 0.55);
 
-  --display: "Oxanium", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --display: "Archivo", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    sans-serif;
+  --body: "Space Grotesk", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    sans-serif;
   --mono: "Spline Sans Mono", ui-monospace, SFMono-Regular, Menlo, Monaco,
     Consolas, "Liberation Mono", "Courier New", monospace;
 
@@ -31,11 +35,15 @@ body {
 body {
   margin: 0;
   color: var(--ink);
-  font-family: var(--display);
+  font-family: var(--body);
   overflow-x: hidden;
   background:
-    radial-gradient(1000px 700px at 22% 16%, var(--haze), transparent 62%),
-    radial-gradient(1000px 700px at 78% 30%, rgba(125, 249, 255, 0.06), transparent 62%),
+    radial-gradient(
+      900px 900px at 58% 45%,
+      color-mix(in oklab, var(--accent) 18%, transparent),
+      transparent 64%
+    ),
+    radial-gradient(1200px 900px at 12% 18%, rgba(243, 242, 237, 0.045), transparent 72%),
     linear-gradient(180deg, var(--bg0), var(--bg1) 42%, var(--bg2));
 }
 
@@ -45,24 +53,15 @@ body::before {
   inset: 0;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.13;
+  opacity: 0.035;
   background: repeating-linear-gradient(
     to bottom,
-    rgba(231, 251, 255, 0.03) 0px,
-    rgba(231, 251, 255, 0) 2px,
-    rgba(0, 0, 0, 0) 6px
+    rgba(243, 242, 237, 0.35),
+    rgba(243, 242, 237, 0.35) 1px,
+    transparent 1px,
+    transparent 6px
   );
   mix-blend-mode: overlay;
-  animation: roll 10s linear infinite;
-}
-
-@keyframes roll {
-  0% {
-    transform: translateY(-8px);
-  }
-  100% {
-    transform: translateY(8px);
-  }
 }
 
 .starfield {
@@ -105,72 +104,65 @@ body::before {
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  opacity: 0.7;
-  filter: blur(0.25px);
+  opacity: 0.85;
+  filter: blur(0.2px);
 }
 
 .cosmic::before {
   content: "";
   position: absolute;
-  width: 460px;
-  height: 460px;
-  right: -140px;
-  bottom: -140px;
+  width: 520px;
+  height: 520px;
+  right: -160px;
+  bottom: -160px;
   border-radius: 999px;
   background:
-    radial-gradient(circle at 40% 35%, var(--halo), transparent 62%),
-    radial-gradient(circle at 60% 60%, rgba(255, 255, 255, 0.04), transparent 66%);
-  transform: rotate(-6deg);
-  animation: float 12s ease-in-out infinite;
+    radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.92) 0 44%, rgba(0, 0, 0, 0) 66%),
+    radial-gradient(circle at 44% 42%, color-mix(in oklab, var(--accent2) 28%, transparent), transparent 62%),
+    radial-gradient(circle at 58% 60%, color-mix(in oklab, var(--accent) 20%, transparent), transparent 70%),
+    radial-gradient(circle at 38% 30%, var(--halo), transparent 62%);
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--accent) 16%, transparent),
+    0 0 90px color-mix(in oklab, var(--accent) 14%, transparent);
+  transform: rotate(-10deg);
+  animation: float 16s ease-in-out infinite;
 }
 
 .cosmic::after {
   content: "";
   position: absolute;
-  width: 520px;
-  height: 520px;
-  right: -170px;
+  width: 780px;
+  height: 420px;
+  right: -300px;
   bottom: -170px;
   border-radius: 999px;
   background: conic-gradient(
-    from 0deg,
+    from 220deg,
     transparent,
-    rgba(125, 249, 255, 0.18),
+    color-mix(in oklab, var(--accent) 58%, transparent),
     transparent,
-    rgba(255, 79, 216, 0.14),
-    transparent
+    color-mix(in oklab, var(--accent2) 46%, transparent),
+    transparent,
+    rgba(0, 0, 0, 0)
   );
-  mask-image: radial-gradient(circle, transparent 56%, black 58%);
-  opacity: 0.55;
-  animation: spin 18s linear infinite;
-}
-
-body[data-scene="sun"] .cosmic::before {
-  background:
-    radial-gradient(circle at 38% 35%, rgba(255, 211, 122, 0.32), transparent 58%),
-    radial-gradient(circle at 55% 55%, rgba(255, 106, 213, 0.10), transparent 64%);
-}
-
-body[data-scene="moon"] .cosmic::after {
-  background: conic-gradient(
-    from 0deg,
-    transparent,
-    rgba(183, 199, 255, 0.16),
-    transparent,
-    rgba(125, 249, 255, 0.12),
-    transparent
+  -webkit-mask-image: radial-gradient(
+    closest-side,
+    transparent 54%,
+    black 56%,
+    black 62%,
+    transparent 64%
   );
-}
-
-body[data-scene="star"] .cosmic::after {
-  background: conic-gradient(
-    from 0deg,
-    transparent,
-    rgba(125, 249, 255, 0.16),
-    transparent,
-    rgba(57, 255, 20, 0.08),
-    transparent
+  mask-image: radial-gradient(
+    closest-side,
+    transparent 54%,
+    black 56%,
+    black 62%,
+    transparent 64%
   );
+  opacity: 0.72;
+  transform: rotate(12deg) scaleY(0.48);
+  transform-origin: center;
+  animation: spin 22s linear infinite;
 }
 
 @keyframes float {
@@ -260,11 +252,12 @@ body[data-scene="star"] .cosmic::after {
 }
 
 .brand__title {
+  font-family: var(--display);
   font-size: clamp(20px, 3vw, 34px);
   line-height: 1.04;
   font-weight: 800;
   letter-spacing: -0.02em;
-  text-shadow: 0 0 26px rgba(125, 249, 255, 0.10),
+  text-shadow: 0 0 26px color-mix(in oklab, var(--accent) 24%, transparent),
     0 0 40px rgba(0, 0, 0, 0.55);
 }
 
