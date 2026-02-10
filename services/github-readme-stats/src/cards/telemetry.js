@@ -143,7 +143,10 @@ const renderTelemetryCard = (stats, topLangs, options = {}) => {
   const hudDim = colors.textColor;
   const hudLine = colors.borderColor;
 
-  const name = encodeHTML(stats?.name || "");
+  const rawName = String(stats?.name || "").trim();
+  const clippedName =
+    rawName.length > 18 ? `${rawName.slice(0, 18).trim()}...` : rawName;
+  const name = encodeHTML(clippedName);
 
   const metrics = [
     { k: "Stars", v: stats.totalStars },
@@ -156,12 +159,12 @@ const renderTelemetryCard = (stats, topLangs, options = {}) => {
 
   const tiles = (() => {
     const colGap = 18;
-    const rowGap = 16;
+    const rowGap = 12;
     const cols = 2;
     const tileW = Math.floor((leftW - colGap) / cols);
-    const tileH = 70;
+    const tileH = 60;
     const baseX = P;
-    const baseY = 88;
+    const baseY = 148;
 
     return metrics
       .map((m, i) => {
@@ -175,8 +178,8 @@ const renderTelemetryCard = (stats, topLangs, options = {}) => {
         return `
           <g class="tile" transform="translate(${x}, ${y})">
             <rect class="tile__bg" x="0" y="0" width="${tileW}" height="${tileH}" rx="14" />
-            <text class="tile__k" x="16" y="26">${m.k.toUpperCase()}</text>
-            <text class="tile__v" x="16" y="56">${value}</text>
+            <text class="tile__k" x="16" y="24">${m.k.toUpperCase()}</text>
+            <text class="tile__v" x="16" y="48">${value}</text>
           </g>
         `;
       })
@@ -185,9 +188,9 @@ const renderTelemetryCard = (stats, topLangs, options = {}) => {
 
   const langRows = getLangRows(topLangs, langs_count);
   const langs = (() => {
-    const headY = 96;
-    const rowY0 = 126;
-    const rowH = 32;
+    const headY = 154;
+    const rowY0 = 182;
+    const rowH = 30;
     const barH = 8;
     const barW = Math.max(220, Math.round(rightW - 120));
 
@@ -313,6 +316,21 @@ const renderTelemetryCard = (stats, topLangs, options = {}) => {
 
     .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
 
+    .kicker {
+      font: 700 10px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      fill: ${hudDim};
+      opacity: 0.78;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+    }
+
+    .hero {
+      font: 800 38px ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      fill: ${colors.titleColor};
+      letter-spacing: -0.02em;
+      filter: drop-shadow(0 0 18px rgba(0, 0, 0, 0.55)) drop-shadow(0 0 22px rgba(207, 163, 85, 0.10));
+    }
+
     .hdr {
       font: 800 18px ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
       fill: ${colors.titleColor};
@@ -351,7 +369,7 @@ const renderTelemetryCard = (stats, topLangs, options = {}) => {
     }
 
     .tile__v {
-      font: 900 22px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font: 900 20px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       fill: ${hudGreen};
       letter-spacing: 0.08em;
       filter: drop-shadow(0 0 7px rgba(57, 255, 20, 0.55));
@@ -521,16 +539,20 @@ const renderTelemetryCard = (stats, topLangs, options = {}) => {
         ${sceneObj}
 
         <g class="hud">
-          <text class="hdr" x="${P}" y="48">TELEMETRY</text>
-          <text class="sub" x="${W - P}" y="48" text-anchor="end">SCENE · ${scene.toUpperCase()}</text>
-          <text class="sub" x="${P}" y="70">USER · ${name || "UNKNOWN"}</text>
+          <text class="kicker" x="${P}" y="44">TELEMETRY SIGNAL</text>
+          <text class="sub" x="${W - P}" y="44" text-anchor="end">SCENE · ${scene.toUpperCase()}</text>
+          <text class="hero" x="${P}" y="90">${name || "UNKNOWN"}</text>
+          <g class="sig" transform="translate(${P}, 112)">
+            <path d="M0 0H138" stroke="${hudLine}" stroke-opacity="0.38" stroke-width="1" />
+            <text class="kicker" x="150" y="4">HUD · ${scene.toUpperCase()}</text>
+          </g>
 
           ${tiles}
           ${langs}
 
           <g class="frame" stroke="${hudLine}" stroke-width="1" fill="none" opacity="0.9">
             ${corners}
-            <path d="M${P} 80H${W - P}" opacity="0.55" />
+            <path d="M${P} 138H${W - P}" opacity="0.55" />
           </g>
         </g>
       </g>
