@@ -3,11 +3,25 @@
 import { getCardColors } from "../common/color.js";
 import { kFormatter } from "../common/fmt.js";
 import { encodeHTML } from "../common/html.js";
+import fs from "node:fs";
 
 /**
  * @typedef {import("../fetchers/types").StatsData} StatsData
  * @typedef {import("../fetchers/types").TopLangData} TopLangData
  */
+
+const BH_PNG_DATA_URI = (() => {
+  if (process.env.NODE_ENV === "test") return null;
+  try {
+    const buf = fs.readFileSync(
+      new URL("./telemetry-assets/blackhole.png", import.meta.url),
+    );
+    if (!buf || buf.length < 32) return null;
+    return `data:image/png;base64,${buf.toString("base64")}`;
+  } catch {
+    return null;
+  }
+})();
 
 /**
  * @param {string | undefined | null} value
@@ -15,10 +29,18 @@ import { encodeHTML } from "../common/html.js";
  */
 const resolveScene = (value) => {
   const s = typeof value === "string" ? value.toLowerCase() : "";
-  if (s.includes("blackhole") || s.includes("hole")) return "blackhole";
-  if (s.includes("sun")) return "sun";
-  if (s.includes("moon")) return "moon";
-  if (s.includes("star")) return "star";
+  if (s.includes("blackhole") || s.includes("hole")) {
+    return "blackhole";
+  }
+  if (s.includes("sun")) {
+    return "sun";
+  }
+  if (s.includes("moon")) {
+    return "moon";
+  }
+  if (s.includes("star")) {
+    return "star";
+  }
 
   const hour = new Date().getUTCHours();
   const bucket = Math.max(0, Math.min(3, Math.floor(hour / 6)));
@@ -64,7 +86,9 @@ const getLangRows = (topLangs, count) => {
 
   const rows = Object.values(topLangs || {})
     .map((l) => {
-      if (!l) return null;
+      if (!l) {
+        return null;
+      }
       const size = typeof l.size === "number" ? l.size : Number(l.size);
       return { ...l, size };
     })
@@ -78,6 +102,42 @@ const getLangRows = (topLangs, count) => {
     color: l.color || null,
     pct: (l.size / total) * 100,
   }));
+};
+
+/**
+ * Compact long language names so the STACK legend stays readable.
+ * @param {string} name
+ * @returns {string}
+ */
+const compactLangName = (name) => {
+  const n = String(name || "").trim();
+  if (!n) return "Unknown";
+
+  const known = {
+    TypeScript: "TS",
+    JavaScript: "JS",
+    "Jupyter Notebook": "Jupyter NB",
+    "Objective-C++": "ObjC++",
+    "Objective-C": "ObjC",
+    "Visual Basic .NET": "VB.NET",
+    "Emacs Lisp": "Elisp",
+  };
+  if (known[n]) return known[n];
+
+  if (n.length <= 14) return n;
+
+  const words = n.split(/\s+/).filter(Boolean);
+  if (words.length >= 2) {
+    const first = words[0];
+    const rest = words
+      .slice(1)
+      .map((w) => (w && /[A-Za-z0-9]/.test(w[0]) ? w[0].toUpperCase() : ""))
+      .join("");
+    const compact = `${first} ${rest}`.trim();
+    if (compact && compact.length <= 14) return compact;
+  }
+
+  return n.length <= 16 ? n : `${n.slice(0, 13).trim()}...`;
 };
 
 /**
@@ -136,8 +196,10 @@ const renderTelemetryCard = (stats, topLangs, options = {}) => {
 
   const P = 38;
   const leftW = Math.round(W * 0.52);
-  const rightX = P + leftW + 28;
-  const rightW = W - rightX - P;
+  const objCx = Math.round(W * 0.8);
+  const objCy = Math.round(H * 0.57);
+  const objR = Math.max(112, Math.min(160, Math.round(W * 0.16)));
+  const bhFrame = Math.round(objR * 3.55);
 
   const hudGreen = "#39ff14";
   const hudDim = colors.textColor;
@@ -160,16 +222,16 @@ const renderTelemetryCard = (stats, topLangs, options = {}) => {
   const tiles = (() => {
     const colGap = 18;
     const rowGap = 12;
-    const cols = 2;
-    const tileW = Math.floor((leftW - colGap) / cols);
-    const tileH = 60;
+    const cols = 3;
+    const tileW = Math.floor((leftW - colGap * (cols - 1)) / cols);
+    const tileH = 54;
     const baseX = P;
-    const baseY = 148;
+    const baseY = 154;
 
     return metrics
       .map((m, i) => {
-        const col = i % 2;
-        const row = Math.floor(i / 2);
+        const col = i % cols;
+        const row = Math.floor(i / cols);
         const x = baseX + col * (tileW + colGap);
         const y = baseY + row * (tileH + rowGap);
         const value =
@@ -187,43 +249,119 @@ const renderTelemetryCard = (stats, topLangs, options = {}) => {
   })();
 
   const langRows = getLangRows(topLangs, langs_count);
-  const langs = (() => {
-    const headY = 154;
-    const rowY0 = 182;
-    const rowH = 30;
-    const barH = 8;
-    const barW = Math.max(220, Math.round(rightW - 120));
+  const stack = (() => {
+    const candidates = langRows.slice(0, 8);
 
-    return `
-      <g class="langs" transform="translate(${rightX}, 0)">
-        <text class="h2" x="0" y="${headY}">STACK</text>
-        ${langRows.length
-          ? langRows
-              .map((l, idx) => {
-                const y = rowY0 + idx * rowH;
-                const pct = Math.max(0, Math.min(100, l.pct));
-                const fillW = Math.max(2, Math.round((pct / 100) * barW));
-                const c = l.color || colors.titleColor;
-                return `
-                  <g class="lang" transform="translate(0, ${y})">
-                    <circle class="lang__dot" cx="4" cy="4" r="4" fill="${c}" />
-                    <text class="lang__name" x="16" y="8">${encodeHTML(l.name)}</text>
-                    <text class="lang__pct" x="${rightW}" y="8" text-anchor="end">${pct.toFixed(1)}%</text>
-                    <rect class="lang__track" x="16" y="14" width="${barW}" height="${barH}" rx="999" />
-                    <rect class="lang__fill" x="16" y="14" width="${fillW}" height="${barH}" rx="999" fill="${c}" />
-                  </g>
-                `;
-              })
-              .join("\n")
-          : `<text class="lang__empty" x="0" y="${rowY0}">NO LANGUAGE DATA</text>`}
-      </g>
-    `;
+    const chipH = 24;
+    const padX = 12;
+    const gapX = 10;
+    const pctSlot = 40;
+
+    // Keep chips in the left HUD zone so they never clash with the scene object.
+    const maxW = leftW;
+
+    const y = H - P - chipH;
+    let x = P;
+
+    const estimateW = (label) => {
+      // Rough glyph width estimate for 11px UI sans text.
+      const t = String(label || "");
+      return Math.round(7.0 * t.length);
+    };
+
+    /** @type {{row: {name: string, color: string | null, pct: number}, w: number, label: string, pctLabel: string}[]} */
+    const placed = [];
+
+    for (const row of candidates) {
+      const label = compactLangName(row.name);
+      const pctLabel = `${Math.max(0, Math.min(100, Math.round(row.pct)))}%`;
+      const w = 10 + padX * 2 + estimateW(label) + pctSlot;
+      if (x !== P && x + w > P + maxW) break;
+      placed.push({ row, w, label, pctLabel });
+      x += w + gapX;
+    }
+
+    const remaining = Math.max(0, candidates.length - placed.length);
+    const plusLabel = remaining > 0 ? `+${remaining}` : "";
+    const plusW = plusLabel ? 10 + padX * 2 + estimateW(plusLabel) : 0;
+    const showPlus = Boolean(plusLabel && x !== P && x + plusW <= P + maxW);
+
+    const legend = placed.map((p) => p.row);
+
+    if (!candidates.length) {
+      return {
+        legend,
+        svg: `
+          <g class="stack" transform="translate(${P}, ${H - P - chipH})">
+            <text class="chip__empty" x="0" y="16">STACK · NO DATA</text>
+          </g>
+        `,
+      };
+    }
+
+    let x2 = P;
+    const items = placed
+      .map((pItem) => {
+        const label = pItem.label;
+        const pctLabel = pItem.pctLabel;
+        const w = pItem.w;
+        const color = pItem.row.color || colors.titleColor;
+        const out = `
+          <g class="chip" transform="translate(${x2}, ${y})">
+            <rect class="chip__bg" x="0" y="0" width="${w}" height="${chipH}" rx="999" />
+            <circle class="chip__dot" cx="${padX}" cy="${Math.round(
+          chipH / 2,
+        )}" r="4" fill="${color}" />
+            <text class="chip__txt" x="${padX + 12}" y="${Math.round(
+          chipH / 2 + 4,
+        )}">${encodeHTML(label)}</text>
+            <text class="chip__pct" x="${w - padX}" y="${Math.round(
+          chipH / 2 + 4,
+        )}" text-anchor="end">${encodeHTML(pctLabel)}</text>
+          </g>
+        `;
+        x2 += w + gapX;
+        return out;
+      })
+      .join("\n");
+
+    const plus = showPlus
+      ? (() => {
+          const w = plusW;
+          const out = `
+            <g class="chip" transform="translate(${x2}, ${y})">
+              <rect class="chip__bg" x="0" y="0" width="${w}" height="${chipH}" rx="999" />
+              <circle class="chip__dot" cx="${padX}" cy="${Math.round(
+            chipH / 2,
+          )}" r="4" fill="${colors.titleColor}" />
+              <text class="chip__txt" x="${padX + 12}" y="${Math.round(
+            chipH / 2 + 4,
+          )}">${encodeHTML(plusLabel)}</text>
+            </g>
+          `;
+          return out;
+        })()
+      : "";
+
+    return {
+      legend,
+      svg: `
+        <g class="stack">
+          <text class="h2" x="${P}" y="${H - P - chipH - 10}">STACK</text>
+          ${items}
+          ${plus}
+        </g>
+      `,
+    };
   })();
 
+  const stackChips = stack.svg;
+  const legendRows = stack.legend;
+
   const sceneObj = (() => {
-    const cx = Math.round(W * 0.79);
-    const cy = Math.round(H * 0.58);
-    const r = Math.max(110, Math.min(160, Math.round(W * 0.16)));
+    const cx = objCx;
+    const cy = objCy;
+    const r = objR;
 
     if (scene === "sun") {
       return `
@@ -268,15 +406,166 @@ const renderTelemetryCard = (stats, topLangs, options = {}) => {
     }
 
     // blackhole default
+    const orbit = (() => {
+      const rx = r * 1.85;
+      const ry = r * 0.64;
+
+      const toRad = (deg) => (deg * Math.PI) / 180;
+      const p = (deg) => {
+        const a = toRad(deg);
+        const x = rx * Math.cos(a);
+        const y = ry * Math.sin(a);
+        return { x, y };
+      };
+
+      // Keep the language HUD on the right side so it never intrudes into the left panel.
+      // (Also avoids the “floating bars” feel when the orbit animates.)
+      const start = -78;
+      const end = 78;
+      const span = end - start;
+      const gap = 1.8;
+
+      const sTrack = p(start);
+      const eTrack = p(end);
+      const largeTrack = span > 180 ? 1 : 0;
+      const arcTrack = `<path class="orbit__track" d="M ${sTrack.x.toFixed(
+        2,
+      )} ${sTrack.y.toFixed(2)} A ${rx.toFixed(2)} ${ry.toFixed(
+        2,
+      )} 0 ${largeTrack} 1 ${eTrack.x.toFixed(2)} ${eTrack.y.toFixed(2)}" />`;
+
+      const arcSegments = (() => {
+        if (!legendRows.length) return "";
+        let a0 = start;
+
+        return legendRows
+          .slice(0, 6)
+          .map((l, idx) => {
+            const pct = Math.max(0, Math.min(100, l.pct));
+            const seg = (pct / 100) * span;
+            const a1 = a0 + Math.max(0, seg - gap);
+            const s = p(a0);
+            const e = p(a1);
+            const large = a1 - a0 > 180 ? 1 : 0;
+            const c = l.color || colors.titleColor;
+            const path = `M ${s.x.toFixed(2)} ${s.y.toFixed(
+              2,
+            )} A ${rx.toFixed(2)} ${ry.toFixed(
+              2,
+            )} 0 ${large} 1 ${e.x.toFixed(2)} ${e.y.toFixed(2)}`;
+
+            a0 = a0 + seg;
+
+            return `<path class="orbit__seg orbit__seg--${idx}" d="${path}" stroke="${c}" />`;
+          })
+          .join("\n");
+      })();
+
+      return { arcTrack, arcSegments };
+    })();
+
+    const usePng = Boolean(BH_PNG_DATA_URI);
+    const body = usePng
+      ? (() => {
+          const frame = bhFrame;
+          const x0 = -Math.round(frame / 2);
+          const y0 = -Math.round(frame / 2);
+          return `
+            <g class="bhpng" opacity="0.96">
+              <image href="${BH_PNG_DATA_URI}" x="${x0}" y="${y0}" width="${frame}" height="${frame}" preserveAspectRatio="xMidYMid meet" />
+            </g>
+          `;
+        })()
+      : `
+        <g class="bh__diskTilt" transform="rotate(-10)">
+          <g class="bh__diskGlow">
+            <ellipse rx="${Math.round(r * 1.95)}" ry="${Math.round(
+          r * 0.52,
+        )}" fill="none" stroke="url(#bh-disk)" stroke-width="18" stroke-linecap="round" opacity="0.18" />
+          </g>
+          <g class="bh__disk" filter="url(#bh-diskNoise)">
+            <ellipse rx="${Math.round(r * 1.95)}" ry="${Math.round(
+          r * 0.52,
+        )}" fill="none" stroke="url(#bh-disk)" stroke-width="10" stroke-linecap="round" opacity="0.92" />
+            <ellipse rx="${Math.round(r * 1.55)}" ry="${Math.round(
+          r * 0.36,
+        )}" fill="none" stroke="url(#bh-disk)" stroke-width="6" stroke-linecap="round" opacity="0.72" />
+            <ellipse rx="${Math.round(r * 1.22)}" ry="${Math.round(
+          r * 0.28,
+        )}" fill="none" stroke="url(#bh-diskCool)" stroke-width="3" stroke-linecap="round" opacity="0.5" />
+          </g>
+
+          <g class="bh__dust">
+            ${(() => {
+              const rx = r * 2.15;
+              const ry = r * 0.58;
+              const angles = [
+                -2.7,
+                -2.05,
+                -1.55,
+                -1.15,
+                -0.62,
+                -0.12,
+                0.28,
+                0.72,
+                1.22,
+                1.78,
+                2.18,
+                2.58,
+              ];
+              return angles
+                .map((a, i) => {
+                  const x = (Math.cos(a) * rx).toFixed(1);
+                  const y = (Math.sin(a) * ry).toFixed(1);
+                  const rr = (1.2 + (i % 3) * 0.7).toFixed(1);
+                  const op = (0.16 + (i % 4) * 0.06).toFixed(2);
+                  const delay = `${i * 220}ms`;
+                  return `<circle class="bh__dustPt" cx="${x}" cy="${y}" r="${rr}" style="opacity:${op};animation-delay:${delay}" />`;
+                })
+                .join("\n");
+            })()}
+          </g>
+        </g>
+
+        <g class="bh__core">
+          <circle class="bh__rim" r="${Math.round(r * 1.06)}" fill="url(#bh-rim)" opacity="0.88" />
+          <circle class="bh__void" r="${Math.round(r * 0.78)}" fill="#000000" opacity="0.95" />
+          <circle class="bh__hole" r="${Math.round(r * 0.62)}" fill="#000000" opacity="0.98" />
+          <circle class="bh__photon" r="${Math.round(r * 0.9)}" fill="none" stroke="url(#bh-photon)" stroke-width="7" opacity="0.85" />
+        </g>
+      `;
+
     return `
       <g class="obj obj--hole" transform="translate(${cx}, ${cy})">
-        <g class="hole__disk">
-          <ellipse rx="${Math.round(r * 1.9)}" ry="${Math.round(r * 0.46)}" fill="none" stroke="url(#sp-disk)" stroke-width="10" stroke-linecap="round" />
-          <ellipse rx="${Math.round(r * 1.45)}" ry="${Math.round(r * 0.34)}" fill="none" stroke="url(#sp-disk)" stroke-width="6" stroke-linecap="round" opacity="0.75" />
+        <circle class="bh__halo" r="${Math.round(r * 1.9)}" fill="url(#bh-halo)" opacity="${
+          usePng ? "0.5" : "0.8"
+        }" />
+        ${body}
+
+        <g class="hole__orbits">
+          ${orbit.arcTrack}
+          ${orbit.arcSegments}
         </g>
-        <circle r="${Math.round(r * 0.95)}" fill="url(#sp-hole)" opacity="0.92" />
-        <circle r="${Math.round(r * 0.64)}" fill="#000000" opacity="0.92" />
-        <path class="hole__lensing" d="M${-Math.round(r * 1.18)} ${-Math.round(r * 0.16)} C${-Math.round(r * 0.35)} ${-Math.round(r * 0.56)}, ${Math.round(r * 0.35)} ${-Math.round(r * 0.56)}, ${Math.round(r * 1.18)} ${-Math.round(r * 0.16)}" />
+
+        <g class="bh__fx" opacity="0.92">
+          <ellipse class="bh__dash bh__dash--a" rx="${Math.round(
+            r * 1.88,
+          )}" ry="${Math.round(r * 0.66)}" />
+          <ellipse class="bh__dash bh__dash--b" rx="${Math.round(
+            r * 1.88,
+          )}" ry="${Math.round(r * 0.66)}" />
+          <ellipse class="bh__dash bh__dash--c" rx="${Math.round(
+            r * 1.06,
+          )}" ry="${Math.round(r * 0.96)}" />
+        </g>
+
+        <path class="bh__lensing" d="M${-Math.round(r * 1.22)} ${-Math.round(
+          r * 0.1,
+        )} C${-Math.round(r * 0.36)} ${-Math.round(r * 0.62)}, ${Math.round(
+          r * 0.36,
+        )} ${-Math.round(r * 0.62)}, ${Math.round(r * 1.22)} ${-Math.round(
+          r * 0.1,
+        )}" />
       </g>
     `;
   })();
@@ -354,7 +643,7 @@ const renderTelemetryCard = (stats, topLangs, options = {}) => {
     }
 
     .tile__bg {
-      fill: rgba(0, 0, 0, 0.25);
+      fill: rgba(0, 0, 0, 0.18);
       stroke: ${hudLine};
       stroke-opacity: 0.24;
       stroke-width: 1;
@@ -373,29 +662,34 @@ const renderTelemetryCard = (stats, topLangs, options = {}) => {
       fill: ${hudGreen};
       letter-spacing: 0.08em;
       filter: drop-shadow(0 0 7px rgba(57, 255, 20, 0.55));
+      font-variant-numeric: tabular-nums;
     }
 
-    .lang__name, .lang__pct {
-      font: 600 11px ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-      fill: ${colors.textColor};
-      opacity: 0.80;
+    .chip__bg {
+      fill: rgba(0, 0, 0, 0.24);
+      stroke: ${hudLine};
+      stroke-opacity: 0.22;
+      stroke-width: 1;
     }
-
-    .lang__empty {
-      font: 600 11px ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    .chip__txt {
+      font: 650 11px ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
       fill: ${colors.textColor};
-      opacity: 0.65;
-      letter-spacing: 0.10em;
+      opacity: 0.86;
+      letter-spacing: 0.02em;
+    }
+    .chip__pct {
+      font: 850 10px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      fill: ${hudDim};
+      opacity: 0.72;
+      letter-spacing: 0.12em;
+      font-variant-numeric: tabular-nums;
+    }
+    .chip__empty {
+      font: 650 11px ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      fill: ${colors.textColor};
+      opacity: 0.72;
+      letter-spacing: 0.16em;
       text-transform: uppercase;
-    }
-
-    .lang__track {
-      fill: rgba(243, 242, 237, 0.06);
-      stroke: rgba(243, 242, 237, 0.06);
-    }
-
-    .lang__fill {
-      filter: drop-shadow(0 0 10px rgba(207, 163, 85, 0.22));
     }
 
     .st { fill: ${colors.textColor}; opacity: 0.22; animation: tw 3.0s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
@@ -412,8 +706,97 @@ const renderTelemetryCard = (stats, topLangs, options = {}) => {
     }
 
     .obj { filter: url(#sp-glow); }
-    .hole__disk { animation: spin 7.0s linear infinite; transform-origin: center; }
-    .hole__lensing { fill: none; stroke: ${colors.titleColor}; stroke-opacity: 0.26; stroke-width: 4.2; stroke-linecap: round; animation: pulse 3.8s ease-in-out infinite; }
+    .hole__orbits {
+      opacity: 0.92;
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: bhPrecess 12s ease-in-out infinite;
+    }
+    .orbit__track { fill: none; stroke: ${hudLine}; stroke-opacity: 0.14; stroke-width: 10; }
+    .orbit__seg { fill: none; stroke-width: 10; stroke-linecap: round; filter: drop-shadow(0 0 10px rgba(207, 163, 85, 0.12)); }
+
+    .bh__halo {
+      filter: drop-shadow(0 0 26px rgba(207, 163, 85, 0.08));
+    }
+
+    .bhpng {
+      transform-box: fill-box;
+      transform-origin: center;
+      filter: drop-shadow(0 0 34px rgba(207, 163, 85, 0.12));
+    }
+
+    .bh__diskGlow,
+    .bh__disk,
+    .bh__dust,
+    .bh__photon {
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+
+    .bh__diskGlow {
+      animation: bhSpin 26s linear infinite;
+    }
+
+    .bh__disk {
+      animation: bhSpin 14s linear infinite;
+    }
+
+    .bh__dust {
+      animation: bhSpin 9s linear infinite reverse;
+    }
+
+    .bh__dustPt {
+      fill: ${colors.iconColor};
+      opacity: 0.32;
+      animation: tw 2.8s ease-in-out infinite;
+      filter: drop-shadow(0 0 12px rgba(207, 163, 85, 0.14));
+    }
+
+    .bh__photon {
+      opacity: 0.85;
+      animation: pulse 3.8s ease-in-out infinite;
+      filter: drop-shadow(0 0 22px rgba(207, 163, 85, 0.18));
+    }
+
+    .bh__lensing {
+      fill: none;
+      stroke: url(#bh-lens);
+      stroke-opacity: 0.55;
+      stroke-width: 4.2;
+      stroke-linecap: round;
+      animation: pulse 4.4s ease-in-out infinite;
+    }
+
+    .bh__dash {
+      fill: none;
+      stroke: ${colors.titleColor};
+      stroke-linecap: round;
+      filter: drop-shadow(0 0 16px rgba(207, 163, 85, 0.18));
+    }
+
+    .bh__dash--a {
+      stroke: ${colors.titleColor};
+      stroke-opacity: 0.72;
+      stroke-width: 7;
+      stroke-dasharray: 170 1400;
+      animation: bhDash 6.8s linear infinite;
+    }
+
+    .bh__dash--b {
+      stroke: ${colors.iconColor};
+      stroke-opacity: 0.52;
+      stroke-width: 4;
+      stroke-dasharray: 110 1400;
+      animation: bhDash 9.6s linear infinite reverse;
+    }
+
+    .bh__dash--c {
+      stroke: ${hudGreen};
+      stroke-opacity: 0.32;
+      stroke-width: 5;
+      stroke-dasharray: 120 1400;
+      animation: bhDash 8.2s linear infinite;
+    }
 
     .sun__flares path { stroke: ${colors.iconColor}; stroke-opacity: 0.55; stroke-width: 4.2; stroke-linecap: round; animation: fl 3.4s ease-in-out infinite; }
     .star__rays path { stroke: ${colors.titleColor}; stroke-opacity: 0.42; stroke-width: 4.0; stroke-linecap: round; }
@@ -437,6 +820,18 @@ const renderTelemetryCard = (stats, topLangs, options = {}) => {
     @keyframes fl {
       0%, 100% { stroke-opacity: 0.22; }
       50% { stroke-opacity: 0.85; }
+    }
+    @keyframes bhSpin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @keyframes bhPrecess {
+      0%, 100% { transform: rotate(-8deg); }
+      50% { transform: rotate(10deg); }
+    }
+    @keyframes bhDash {
+      from { stroke-dashoffset: 0; }
+      to { stroke-dashoffset: -1400; }
     }
   `;
 
@@ -471,7 +866,6 @@ const renderTelemetryCard = (stats, topLangs, options = {}) => {
         <clipPath id="clip">
           <rect x="0.5" y="0.5" width="${W - 1}" height="${H - 1}" rx="${R}" />
         </clipPath>
-
         <pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse">
           <path d="M28 0H0V28" fill="none" stroke="${hudLine}" stroke-opacity="0.12" stroke-width="1" />
         </pattern>
@@ -489,6 +883,52 @@ const renderTelemetryCard = (stats, topLangs, options = {}) => {
             <feMergeNode in="SourceGraphic" />
           </feMerge>
         </filter>
+
+        <filter id="bh-diskNoise" x="-30%" y="-30%" width="160%" height="160%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.015 0.08" numOctaves="2" seed="7" result="noise" />
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="14" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+
+        <radialGradient id="bh-halo" cx="45%" cy="45%" r="72%">
+          <stop offset="0%" stop-color="${colors.titleColor}" stop-opacity="0.26" />
+          <stop offset="38%" stop-color="${colors.iconColor}" stop-opacity="0.10" />
+          <stop offset="70%" stop-color="${colors.borderColor}" stop-opacity="0.08" />
+          <stop offset="100%" stop-color="${colors.borderColor}" stop-opacity="0" />
+        </radialGradient>
+
+        <radialGradient id="bh-rim" cx="50%" cy="50%" r="60%">
+          <stop offset="0%" stop-color="#000000" stop-opacity="0.95" />
+          <stop offset="55%" stop-color="#000000" stop-opacity="0.88" />
+          <stop offset="100%" stop-color="${colors.borderColor}" stop-opacity="0" />
+        </radialGradient>
+
+        <radialGradient id="bh-photon" cx="50%" cy="50%" r="72%">
+          <stop offset="0%" stop-color="${colors.iconColor}" stop-opacity="0" />
+          <stop offset="55%" stop-color="${colors.iconColor}" stop-opacity="0.58" />
+          <stop offset="85%" stop-color="${colors.titleColor}" stop-opacity="0.42" />
+          <stop offset="100%" stop-color="${colors.borderColor}" stop-opacity="0" />
+        </radialGradient>
+
+        <linearGradient id="bh-lens" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="${colors.titleColor}" stop-opacity="0" />
+          <stop offset="35%" stop-color="${colors.iconColor}" stop-opacity="0.55" />
+          <stop offset="55%" stop-color="${colors.titleColor}" stop-opacity="0.52" />
+          <stop offset="100%" stop-color="${colors.titleColor}" stop-opacity="0" />
+        </linearGradient>
+
+        <linearGradient id="bh-disk" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="${colors.titleColor}" stop-opacity="0" />
+          <stop offset="28%" stop-color="${colors.titleColor}" stop-opacity="0.62" />
+          <stop offset="50%" stop-color="${colors.iconColor}" stop-opacity="0.92" />
+          <stop offset="72%" stop-color="${colors.titleColor}" stop-opacity="0.62" />
+          <stop offset="100%" stop-color="${colors.titleColor}" stop-opacity="0" />
+        </linearGradient>
+
+        <linearGradient id="bh-diskCool" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="${hudGreen}" stop-opacity="0" />
+          <stop offset="50%" stop-color="${hudGreen}" stop-opacity="0.42" />
+          <stop offset="100%" stop-color="${hudGreen}" stop-opacity="0" />
+        </linearGradient>
 
         <radialGradient id="sp-sun" cx="35%" cy="35%" r="75%">
           <stop offset="0%" stop-color="${colors.iconColor}" stop-opacity="0.95" />
@@ -508,19 +948,6 @@ const renderTelemetryCard = (stats, topLangs, options = {}) => {
           <circle cx="24" cy="24" r="3.0" fill="${colors.borderColor}" fill-opacity="0.18" />
           <circle cx="14" cy="28" r="1.8" fill="${colors.borderColor}" fill-opacity="0.14" />
         </pattern>
-
-        <radialGradient id="sp-hole" cx="50%" cy="50%" r="60%">
-          <stop offset="0%" stop-color="#000000" stop-opacity="0.95" />
-          <stop offset="55%" stop-color="#000000" stop-opacity="0.88" />
-          <stop offset="100%" stop-color="${colors.borderColor}" stop-opacity="0" />
-        </radialGradient>
-
-        <linearGradient id="sp-disk" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stop-color="${colors.titleColor}" stop-opacity="0" />
-          <stop offset="45%" stop-color="${colors.titleColor}" stop-opacity="0.72" />
-          <stop offset="55%" stop-color="${colors.iconColor}" stop-opacity="0.78" />
-          <stop offset="100%" stop-color="${colors.iconColor}" stop-opacity="0" />
-        </linearGradient>
 
         <radialGradient id="sp-star" cx="50%" cy="50%" r="60%">
           <stop offset="0%" stop-color="${colors.textColor}" stop-opacity="0.95" />
@@ -548,7 +975,7 @@ const renderTelemetryCard = (stats, topLangs, options = {}) => {
           </g>
 
           ${tiles}
-          ${langs}
+          ${stackChips}
 
           <g class="frame" stroke="${hudLine}" stroke-width="1" fill="none" opacity="0.9">
             ${corners}

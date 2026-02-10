@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import * as THREE from "three";
 import BlackHole from "../three/BlackHole.jsx";
 
-export default function BlackHoleBackdrop({ reducedMotion }) {
+export default function BlackHoleBackdrop({ reducedMotion, veil = true }) {
   return (
     <div className="heroBg" aria-hidden="true">
       <Canvas
@@ -15,6 +15,9 @@ export default function BlackHoleBackdrop({ reducedMotion }) {
           gl.outputColorSpace = THREE.SRGBColorSpace;
           gl.toneMapping = THREE.ACESFilmicToneMapping;
           gl.toneMappingExposure = 1.15;
+          // Keep the WebGL buffer transparent so we can screenshot frames with alpha.
+          gl.setClearColor(0x000000, 0);
+          gl.setClearAlpha(0);
         }}
       >
         <Suspense fallback={null}>
@@ -25,8 +28,7 @@ export default function BlackHoleBackdrop({ reducedMotion }) {
       </Canvas>
 
       {/* Portfolio-style veil to add depth and readability over the WebGL */}
-      <div className="heroBg__veil" />
+      {veil ? <div className="heroBg__veil" /> : null}
     </div>
   );
 }
-

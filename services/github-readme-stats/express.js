@@ -30,6 +30,7 @@ async function start() {
   app.use("/api", router);
 
   const server = createServer(app);
+  const port = Number(process.env.PORT || process.env.port || 3000);
 
   if (process.env.NODE_ENV === "production") {
     const dist = path.resolve(__dirname, "dist");
@@ -37,9 +38,10 @@ async function start() {
     app.get(/.*/, (_req, res) => res.sendFile(path.join(dist, "index.html")));
   } else {
     // Vite dev server in middleware mode (single-process dev).
+    const hmrPort = Number(process.env.VITE_HMR_PORT || port + 1);
     const vite = await createViteServer({
       root: __dirname,
-      server: { middlewareMode: true },
+      server: { middlewareMode: true, hmr: { port: hmrPort } },
       appType: "custom",
     });
     app.use(vite.middlewares);
@@ -64,7 +66,6 @@ async function start() {
     });
   }
 
-  const port = process.env.PORT || process.env.port || 9000;
   server.listen(port, "0.0.0.0", () => {
     console.log(`Server running on port ${port}`);
   });

@@ -31,6 +31,20 @@ export default function App() {
     return () => mq.removeEventListener?.("change", sync);
   }, []);
 
+  // Minimal "frame" mode used to generate self-contained assets (e.g. PNG frames)
+  // that can be embedded inside the GitHub README SVG card.
+  const frame = useMemo(() => {
+    const q = new URLSearchParams(window.location.search);
+    return q.get("frame");
+  }, []);
+  if (frame === "blackhole") {
+    const q = new URLSearchParams(window.location.search);
+    const rm = q.get("rm");
+    const frameReducedMotion = !(rm === "0" || rm === "false");
+    document.body.dataset.frame = "true";
+    return <BlackHoleBackdrop reducedMotion={frameReducedMotion} veil={false} />;
+  }
+
   const [username, setUsername] = useState("V0hgg");
   const [theme, setTheme] = useState("space_blackhole_gradient");
   const [sceneMode, setSceneMode] = useState("blackhole");

@@ -19,7 +19,7 @@
     "url": "https://github.com/anuraghazra/github-readme-stats.git"
   },
   "scripts": {
-    "dev": "PORT=3000 node express.js",
+    "dev": "node express.js",
     "start": "node express.js",
     "build": "vite build",
     "preview": "vite preview",

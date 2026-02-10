@@ -96,6 +96,15 @@ body::before {
   mix-blend-mode: overlay;
 }
 
+/* Frame mode: generate transparent renders (no scanlines / no background). */
+body[data-frame="true"] {
+  background: transparent !important;
+}
+
+body[data-frame="true"]::before {
+  display: none;
+}
+
 .starfield {
   position: fixed;
   inset: 0;
