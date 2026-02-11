@@ -1,7 +1,7 @@
 import { resolveScene } from "./cosmic.js";
 
 /**
- * @typedef {"auto" | "blackhole" | "sun" | "star" | "moon"} SceneMode
+ * @typedef {"auto" | "sun" | "star" | "moon"} SceneMode
  */
 
 function safeInt(value, fallback) {
@@ -16,7 +16,7 @@ function safeInt(value, fallback) {
 export function sceneModeToCardStyle(mode) {
   if (!mode || mode === "auto") return "space-auto";
   const scene = resolveScene(mode);
-  // telemetry card resolver checks substrings (sun/star/moon/blackhole)
+  // telemetry card resolver checks substrings (sun/star/moon)
   return `space-${scene}`;
 }
 

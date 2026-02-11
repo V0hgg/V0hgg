@@ -47,7 +47,7 @@ export default function App() {
 
   const [username, setUsername] = useState("V0hgg");
   const [theme, setTheme] = useState("space_blackhole_gradient");
-  const [sceneMode, setSceneMode] = useState("blackhole");
+  const [sceneMode, setSceneMode] = useState("auto");
   const [cacheSeconds, setCacheSeconds] = useState(21600);
   const [langsCount, setLangsCount] = useState(6);
   const [includeAllCommits, setIncludeAllCommits] = useState(true);

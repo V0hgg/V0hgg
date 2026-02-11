@@ -25,12 +25,13 @@ const BH_PNG_DATA_URI = (() => {
 
 /**
  * @param {string | undefined | null} value
- * @returns {"blackhole" | "sun" | "star" | "moon"}
+ * @returns {"sun" | "star" | "moon"}
  */
 const resolveScene = (value) => {
   const s = typeof value === "string" ? value.toLowerCase() : "";
   if (s.includes("blackhole") || s.includes("hole")) {
-    return "blackhole";
+    // Backward compatibility for old URLs that still send blackhole.
+    return "star";
   }
   if (s.includes("sun")) {
     return "sun";
@@ -43,8 +44,8 @@ const resolveScene = (value) => {
   }
 
   const hour = new Date().getUTCHours();
-  const bucket = Math.max(0, Math.min(3, Math.floor(hour / 6)));
-  return /** @type {const} */ (["blackhole", "sun", "star", "moon"][bucket]);
+  const bucket = Math.max(0, Math.min(2, Math.floor(hour / 8)));
+  return /** @type {const} */ (["sun", "star", "moon"][bucket]);
 };
 
 /**
@@ -195,6 +196,8 @@ const renderTelemetryCard = (stats, topLangs, options = {}) => {
   const R = Math.max(0, Math.min(40, Number(border_radius) || 18));
 
   const P = 38;
+  const frameInset = Math.max(12, Math.round(P * 0.55));
+  const frameCornerLen = 20;
   const leftW = Math.round(W * 0.52);
   const objCx = Math.round(W * 0.8);
   const objCy = Math.round(H * 0.57);
@@ -842,10 +845,10 @@ const renderTelemetryCard = (stats, topLangs, options = {}) => {
 
   // Decorative HUD frame corners.
   const corners = `
-    <path d="M${P} ${P + 18}V${P}H${P + 18}" />
-    <path d="M${W - P} ${P + 18}V${P}H${W - P - 18}" />
-    <path d="M${P} ${H - P - 18}V${H - P}H${P + 18}" />
-    <path d="M${W - P} ${H - P - 18}V${H - P}H${W - P - 18}" />
+    <path d="M${frameInset} ${frameInset + frameCornerLen}V${frameInset}H${frameInset + frameCornerLen}" />
+    <path d="M${W - frameInset} ${frameInset + frameCornerLen}V${frameInset}H${W - frameInset - frameCornerLen}" />
+    <path d="M${frameInset} ${H - frameInset - frameCornerLen}V${H - frameInset}H${frameInset + frameCornerLen}" />
+    <path d="M${W - frameInset} ${H - frameInset - frameCornerLen}V${H - frameInset}H${W - frameInset - frameCornerLen}" />
   `;
 
   return `

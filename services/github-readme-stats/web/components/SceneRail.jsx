@@ -2,7 +2,6 @@ import { getSceneLabel } from "../lib/cosmic.js";
 
 const scenes = /** @type {const} */ ([
   { key: "auto", label: "Auto", icon: "⏱" },
-  { key: "blackhole", label: "Hole", icon: "◉" },
   { key: "sun", label: "Sun", icon: "☼" },
   { key: "star", label: "Star", icon: "✶" },
   { key: "moon", label: "Moon", icon: "☾" },
@@ -42,12 +41,10 @@ export default function SceneRail({ scene, mode, onModeChange }) {
       </div>
 
       <div className="sceneRail__legend" aria-hidden="true">
-        <span>00-05 Hole</span>
-        <span>06-11 Sun</span>
-        <span>12-17 Star</span>
-        <span>18-23 Moon</span>
+        <span>00-07 Sun</span>
+        <span>08-15 Star</span>
+        <span>16-23 Moon</span>
       </div>
     </section>
   );
 }
-
